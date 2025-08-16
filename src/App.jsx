@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 
 
@@ -123,6 +123,15 @@ function App() {
   const [message, setMessage] = useState('');
   const [hintCell, setHintCell] = useState(null); // {row, col}
   const [level, setLevel] = useState('Easy');
+
+  useEffect(() => {
+    const newInit = shuffleBoard(defaultBoard);
+    setInitialBoard(newInit);
+    setBoard(newInit.map(row => row.map(cell => (typeof cell === 'number' ? cell : ''))));
+    setMessage('');
+    setHintCell(null);
+    setLevel('Easy');
+  }, []);
 
   const handleChange = (row, col, val) => {
     if (val === '' || (/^[1-9]$/.test(val) && isValid(board, row, col, Number(val)))) {
