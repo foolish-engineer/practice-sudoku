@@ -193,13 +193,18 @@ function App() {
       </div>
       <div className="sudoku-board">
         {board.map((row, i) => (
-          <div className="sudoku-row" key={i}>
+          <div key={i}>
             {row.map((cell, j) => {
-              const blockRight = (j + 1) % 3 === 0 && j !== 8;
-              const blockBottom = (i + 1) % 3 === 0 && i !== 8;
+              const blockRight = (j + 1) % 3 === 0;
+              const blockBottom = (i + 1) % 3 === 0;
+              const blockTop = i % 3 === 0;
+              const blockLeft = j % 3 === 0;
+              // Add classes for block borders
               let cellClass = 'sudoku-cell';
               if (blockRight) cellClass += ' block-right';
               if (blockBottom) cellClass += ' block-bottom';
+              if (blockTop) cellClass += ' block-top';
+              if (blockLeft) cellClass += ' block-left';
               if (hintCell && hintCell.row === i && hintCell.col === j) cellClass += ' sudoku-hint';
               return (
                 <input
