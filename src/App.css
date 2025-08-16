@@ -46,6 +46,14 @@ body {
   transition: background 0.2s;
   color: #000;
 }
+
+/* Add thick border after every 3rd column */
+.sudoku-cell.block-right {
+  border-right: 3px solid #333;
+}
+.sudoku-cell.block-bottom {
+  border-bottom: 3px solid #333;
+}
 .sudoku-cell:disabled {
   background: #e0e0e0;
   color: #333;

@@ -194,17 +194,25 @@ function App() {
       <div className="sudoku-board">
         {board.map((row, i) => (
           <div className="sudoku-row" key={i}>
-            {row.map((cell, j) => (
-              <input
-                key={j}
-                className={`sudoku-cell${hintCell && hintCell.row === i && hintCell.col === j ? ' sudoku-hint' : ''}`}
-                type="text"
-                maxLength={1}
-                value={cell}
-                onChange={e => handleChange(i, j, e.target.value)}
-                disabled={initialBoard[i][j] !== ''}
-              />
-            ))}
+            {row.map((cell, j) => {
+              const blockRight = (j + 1) % 3 === 0 && j !== 8;
+              const blockBottom = (i + 1) % 3 === 0 && i !== 8;
+              let cellClass = 'sudoku-cell';
+              if (blockRight) cellClass += ' block-right';
+              if (blockBottom) cellClass += ' block-bottom';
+              if (hintCell && hintCell.row === i && hintCell.col === j) cellClass += ' sudoku-hint';
+              return (
+                <input
+                  key={j}
+                  className={cellClass}
+                  type="text"
+                  maxLength={1}
+                  value={cell}
+                  onChange={e => handleChange(i, j, e.target.value)}
+                  disabled={initialBoard[i][j] !== ''}
+                />
+              );
+            })}
           </div>
         ))}
       </div>
