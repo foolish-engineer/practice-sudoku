@@ -116,11 +116,13 @@ function solveSudoku(board) {
   return b;
 }
 
+
 function App() {
   const [initialBoard, setInitialBoard] = useState(defaultBoard);
   const [board, setBoard] = useState(defaultBoard);
   const [message, setMessage] = useState('');
   const [hintCell, setHintCell] = useState(null); // {row, col}
+  const [level, setLevel] = useState('Easy');
 
   const handleChange = (row, col, val) => {
     if (val === '' || (/^[1-9]$/.test(val) && isValid(board, row, col, Number(val)))) {
@@ -135,16 +137,24 @@ function App() {
   };
 
   const handleNewSudoku = (difficulty) => {
-    let baseBoard;
-    if (difficulty === 'easy') baseBoard = easyBoard;
-    else if (difficulty === 'medium') baseBoard = mediumBoard;
-    else if (difficulty === 'hard') baseBoard = hardBoard;
-    else baseBoard = defaultBoard;
+    let baseBoard = defaultBoard;
+    let label = 'Easy'
+    if (difficulty === 'easy') {
+      baseBoard = easyBoard;
+      label = 'Easy';
+    } else if (difficulty === 'medium') {
+      baseBoard = mediumBoard;
+      label = 'Medium';
+    } else if (difficulty === 'hard') {
+      baseBoard = hardBoard;
+      label = 'Hard';
+    }
     const newInit = shuffleBoard(baseBoard);
     setInitialBoard(newInit);
     setBoard(newInit.map(row => row.map(cell => (typeof cell === 'number' ? cell : ''))));
     setMessage('');
     setHintCell(null);
+    setLevel(label);
   };
 
   const handleHint = () => {
@@ -172,12 +182,14 @@ function App() {
 
   return (
     <div className="sudoku-app">
-      <h1>Sudoku Game</h1>
+      <h1>Sudoku</h1>
+      <div style={{ marginBottom: '0.5em', textAlign: 'center', fontWeight: 'bold', fontSize: '1.1em' }}>
+        Level: <span data-testid="sudoku-level-label">{level}</span>
+      </div>
       <div style={{ marginBottom: '1em', display: 'flex', gap: '0.5em', justifyContent: 'center' }}>
         <button type="button" onClick={() => handleNewSudoku('easy')}>New Easy</button>
         <button type="button" onClick={() => handleNewSudoku('medium')}>New Medium</button>
         <button type="button" onClick={() => handleNewSudoku('hard')}>New Hard</button>
-        <button type="button" onClick={handleHint}>Get Hint</button>
       </div>
       <div className="sudoku-board">
         {board.map((row, i) => (
@@ -195,6 +207,9 @@ function App() {
             ))}
           </div>
         ))}
+      </div>
+      <div style={{ margin: '1em 0', textAlign: 'center' }}>
+        <button type="button" onClick={handleHint}>Get Hint</button>
       </div>
       <div className="sudoku-message">{message || (isComplete ? 'Congratulations! Puzzle complete.' : '')}</div>
       <div className="sudoku-instructions">
