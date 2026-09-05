@@ -66,6 +66,18 @@ body {
 	background: #e3f2fd;
 }
 
+.sudoku-cell.cell-invalid {
+	border: 2px solid #f44336;
+	outline: 2px solid #f44336;
+	position: relative;
+	z-index: 2;
+	background: #fff59d;
+}
+
+.sudoku-cell.cell-invalid:focus {
+	background: #fff176;
+}
+
 .sudoku-message {
 	color: #d32f2f;
 	min-height: 1.5em;

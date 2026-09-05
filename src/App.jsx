@@ -3,13 +3,16 @@ import "./App.css";
 
 function isValid(board, row, col, value) {
 	for (let i = 0; i < 9; i++) {
-		if (board[row][i] === value || board[i][col] === value) return false;
+		if (i !== col && board[row][i] === value) return false;
+		if (i !== row && board[i][col] === value) return false;
 	}
 	const startRow = Math.floor(row / 3) * 3;
 	const startCol = Math.floor(col / 3) * 3;
 	for (let i = 0; i < 3; i++) {
 		for (let j = 0; j < 3; j++) {
-			if (board[startRow + i][startCol + j] === value) return false;
+			const r = startRow + i;
+			const c = startCol + j;
+			if ((r !== row || c !== col) && board[r][c] === value) return false;
 		}
 	}
 	return true;
@@ -170,17 +173,17 @@ function App() {
 	}, []);
 
 	const handleChange = (row, col, val) => {
-		if (
-			val === "" ||
-			(/^[1-9]$/.test(val) && isValid(board, row, col, Number(val)))
-		) {
+		if (val === "" || /^[1-9]$/.test(val)) {
+			const numVal = val === "" ? "" : Number(val);
 			const newBoard = board.map((r, i) =>
-				r.map((c, j) =>
-					i === row && j === col ? (val === "" ? "" : Number(val)) : c,
-				),
+				r.map((c, j) => (i === row && j === col ? numVal : c)),
 			);
 			setBoard(newBoard);
-			setMessage("");
+			if (numVal !== "" && !isValid(newBoard, row, col, numVal)) {
+				setMessage("Invalid move!");
+			} else {
+				setMessage("");
+			}
 		} else {
 			setMessage("Invalid move!");
 		}
@@ -286,6 +289,9 @@ function App() {
 							if (blockLeft) cellClass += " block-left";
 							if (hintCell && hintCell.row === i && hintCell.col === j)
 								cellClass += " sudoku-hint";
+							const isUserCell = initialBoard[i][j] === "" && cell !== "";
+							if (isUserCell && !isValid(board, i, j, cell))
+								cellClass += " cell-invalid";
 							return (
 								<input
 									key={`cell-${i}-${j}`}
