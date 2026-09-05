@@ -161,6 +161,17 @@ function App() {
 	const [level, setLevel] = useState("Easy");
 	const [solvedBoard, setSolvedBoard] = useState(null);
 	const hintTimerRef = useRef(null);
+	const [animatingValue, setAnimatingValue] = useState(null);
+	const animTimerRef = useRef(null);
+
+	const handleAnimateSame = (val) => {
+		if (!val) return;
+		setAnimatingValue(val);
+		if (animTimerRef.current) clearTimeout(animTimerRef.current);
+		animTimerRef.current = setTimeout(() => {
+			setAnimatingValue(null);
+		}, 3000);
+	};
 
 	useEffect(() => {
 		const { puzzleBoard, solvedBoard } = generatePuzzle("easy");
@@ -198,6 +209,8 @@ function App() {
 		setInitialBoard(puzzleBoard);
 		setBoard(puzzleBoard.map((row) => [...row]));
 		setSolvedBoard(solvedBoard);
+		if (animTimerRef.current) clearTimeout(animTimerRef.current);
+		setAnimatingValue(null);
 		setMessage("");
 		setHintCell(null);
 		setLevel(label);
@@ -275,7 +288,7 @@ function App() {
 			</div>
 			<div className="sudoku-board">
 				{board.map((row, i) => (
-					<div key={`row-${i}`}>
+					<div key={`row-${i}`} className="sudoku-row">
 						{row.map((cell, j) => {
 							const blockRight = (j + 1) % 3 === 0;
 							const blockBottom = (i + 1) % 3 === 0;
@@ -292,16 +305,53 @@ function App() {
 							const isUserCell = initialBoard[i][j] === "" && cell !== "";
 							if (isUserCell && !isValid(board, i, j, cell))
 								cellClass += " cell-invalid";
+							if (
+								animatingValue !== null &&
+								cell !== "" &&
+								Number(cell) === Number(animatingValue)
+							)
+								cellClass += " cell-animated";
 							return (
-								<input
-									key={`cell-${i}-${j}`}
-									className={cellClass}
-									type="text"
-									maxLength={1}
-									value={cell}
-									onChange={(e) => handleChange(i, j, e.target.value)}
-									disabled={initialBoard[i][j] !== ""}
-								/>
+								<div
+									key={`cell-wrap-${i}-${j}`}
+									className="sudoku-cell-wrapper"
+								>
+									<input
+										className={cellClass}
+										type="text"
+										maxLength={1}
+										value={cell}
+										onChange={(e) => handleChange(i, j, e.target.value)}
+										disabled={initialBoard[i][j] !== ""}
+									/>
+									{cell !== "" && (
+										<button
+											type="button"
+											className="sudoku-cell-badge"
+											onClick={(e) => {
+												e.stopPropagation();
+												handleAnimateSame(cell);
+											}}
+											title={`Highlight all ${cell}s for 3 seconds`}
+											aria-label={`Highlight all cells with number ${cell}`}
+										>
+											<svg
+												width="8"
+												height="8"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="3.5"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											>
+												<title>Highlight matching numbers</title>
+												<circle cx="11" cy="11" r="7" />
+												<line x1="21" y1="21" x2="16" y2="16" />
+											</svg>
+										</button>
+									)}
+								</div>
 							);
 						})}
 					</div>

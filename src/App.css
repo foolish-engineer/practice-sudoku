@@ -27,6 +27,46 @@ body {
 	margin: 1.5rem 0;
 }
 
+.sudoku-row {
+	display: flex;
+	justify-content: center;
+}
+
+.sudoku-cell-wrapper {
+	position: relative;
+	display: inline-flex;
+}
+
+.sudoku-cell-badge {
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	width: 14px;
+	height: 14px;
+	padding: 0;
+	margin: 0;
+	border: 1px solid rgba(25, 118, 210, 0.25);
+	border-radius: 50%;
+	background: #e3f2fd;
+	color: #1976d2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	z-index: 4;
+	transition:
+		background-color 0.2s,
+		transform 0.15s,
+		border-color 0.2s;
+}
+
+.sudoku-cell-badge:hover {
+	background: #2196f3;
+	color: #fff;
+	border-color: #1976d2;
+	transform: scale(1.25);
+}
+
 .sudoku-cell {
 	width: 54px;
 	height: 54px;
@@ -76,6 +116,31 @@ body {
 
 .sudoku-cell.cell-invalid:focus {
 	background: #fff176;
+}
+
+@keyframes pulseHighlight {
+	0% {
+		transform: scale(1);
+		background-color: #bbdefb;
+		box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
+	}
+	50% {
+		transform: scale(1.08);
+		background-color: #90caf9;
+		box-shadow: 0 0 12px 3px rgba(33, 150, 243, 0.5);
+		z-index: 10;
+	}
+	100% {
+		transform: scale(1);
+		background-color: #bbdefb;
+		box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+	}
+}
+
+.sudoku-cell.cell-animated {
+	animation: pulseHighlight 0.75s ease-in-out infinite;
+	position: relative;
+	z-index: 5;
 }
 
 .sudoku-message {
