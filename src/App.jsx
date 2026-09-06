@@ -244,7 +244,7 @@ function App() {
 		board.every((row, i) => row.every((cell, j) => cell === solvedBoard[i][j]));
 
 	return (
-		<div className="sudoku-app">
+		<div className="max-w-[600px] w-full p-8 bg-white rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] text-center mx-auto">
 			<h1>Sudoku</h1>
 			<div
 				style={{
@@ -265,56 +265,56 @@ function App() {
 				}}
 			>
 				<button
-					className="btn btn-easy"
+					className="px-5 py-2.5 border-none rounded-lg text-base font-semibold cursor-pointer text-white transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)] hover:-translate-y-[1px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)] active:translate-y-[1px] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] bg-green-500 hover:bg-green-600"
 					type="button"
 					onClick={() => handleNewSudoku("easy")}
 				>
 					New Easy
 				</button>
 				<button
-					className="btn btn-medium"
+					className="px-5 py-2.5 border-none rounded-lg text-base font-semibold cursor-pointer text-white transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)] hover:-translate-y-[1px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)] active:translate-y-[1px] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] bg-orange-500 hover:bg-orange-600"
 					type="button"
 					onClick={() => handleNewSudoku("medium")}
 				>
 					New Medium
 				</button>
 				<button
-					className="btn btn-hard"
+					className="px-5 py-2.5 border-none rounded-lg text-base font-semibold cursor-pointer text-white transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)] hover:-translate-y-[1px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)] active:translate-y-[1px] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] bg-red-500 hover:bg-red-600"
 					type="button"
 					onClick={() => handleNewSudoku("hard")}
 				>
 					New Hard
 				</button>
 			</div>
-			<div className="sudoku-board">
+			<div className="my-6 inline-block">
 				{board.map((row, i) => (
-					<div key={`row-${i}`} className="sudoku-row">
+					<div key={`row-${i}`} className="flex justify-center">
 						{row.map((cell, j) => {
 							const blockRight = (j + 1) % 3 === 0;
 							const blockBottom = (i + 1) % 3 === 0;
 							const blockTop = i % 3 === 0;
 							const blockLeft = j % 3 === 0;
 							// Add classes for block borders
-							let cellClass = "sudoku-cell";
-							if (blockRight) cellClass += " block-right";
-							if (blockBottom) cellClass += " block-bottom";
-							if (blockTop) cellClass += " block-top";
-							if (blockLeft) cellClass += " block-left";
+							let cellClass = "w-[54px] h-[54px] text-center text-[1.2rem] border border-[#bbb] outline-none bg-[#f9f9f9] transition-colors duration-200 text-black focus:bg-blue-50 disabled:bg-[#e0e0e0] disabled:text-[#333] disabled:font-bold";
+							if (blockRight) cellClass += " border-r-[3px] border-r-[#333]";
+							if (blockBottom) cellClass += " border-b-[3px] border-b-[#333]";
+							if (blockTop) cellClass += " border-t-[3px] border-t-[#333]";
+							if (blockLeft) cellClass += " border-l-[3px] border-l-[#333]";
 							if (hintCell && hintCell.row === i && hintCell.col === j)
-								cellClass += " sudoku-hint";
+								cellClass += " !bg-[#fff59d] transition-colors duration-500";
 							const isUserCell = initialBoard[i][j] === "" && cell !== "";
 							if (isUserCell && !isValid(board, i, j, cell))
-								cellClass += " cell-invalid";
+								cellClass += " !border-2 !border-red-500 !outline-2 !outline-red-500 z-[2] !bg-[#fff59d] focus:!bg-[#fff176]";
 							if (
 								animatingValue !== null &&
 								cell !== "" &&
 								Number(cell) === Number(animatingValue)
 							)
-								cellClass += " cell-animated";
+								cellClass += " animate-pulse-highlight z-[5] relative";
 							return (
 								<div
 									key={`cell-wrap-${i}-${j}`}
-									className="sudoku-cell-wrapper"
+									className="relative inline-flex"
 								>
 									<input
 										className={cellClass}
@@ -327,7 +327,7 @@ function App() {
 									{cell !== "" && (
 										<button
 											type="button"
-											className="sudoku-cell-badge"
+											className="absolute top-[3px] right-[3px] w-[14px] h-[14px] p-0 m-0 border border-blue-500/25 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center cursor-pointer z-[4] transition-all duration-200 hover:bg-blue-500 hover:text-white hover:border-blue-600 hover:scale-125"
 											onClick={(e) => {
 												e.stopPropagation();
 												handleAnimateSame(cell);
@@ -358,14 +358,14 @@ function App() {
 				))}
 			</div>
 			<div style={{ margin: "1em 0", textAlign: "center" }}>
-				<button className="btn btn-hint" type="button" onClick={handleHint}>
+				<button className="px-5 py-2.5 border-none rounded-lg text-base font-semibold cursor-pointer text-white transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)] hover:-translate-y-[1px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)] active:translate-y-[1px] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] bg-blue-500 hover:bg-blue-600" type="button" onClick={handleHint}>
 					Get Hint
 				</button>
 			</div>
-			<div className="sudoku-message">
+			<div className="text-red-600 min-h-[1.5em] mb-2">
 				{message || (isComplete ? "Congratulations! Puzzle complete." : "")}
 			</div>
-			<div className="sudoku-instructions">
+			<div className="text-[0.95em] text-gray-600 mt-4">
 				<p>
 					Fill the grid so that every row, column, and 3x3 box contains the
 					numbers 1-9.
