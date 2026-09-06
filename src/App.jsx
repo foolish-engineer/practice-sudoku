@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import "./App.css";
 
 function isValid(board, row, col, value) {
 	for (let i = 0; i < 9; i++) {
@@ -246,24 +245,10 @@ function App() {
 	return (
 		<div className="max-w-[600px] w-full p-8 bg-white rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] text-center mx-auto">
 			<h1>Sudoku</h1>
-			<div
-				style={{
-					marginBottom: "0.5em",
-					textAlign: "center",
-					fontWeight: "bold",
-					fontSize: "1.1em",
-				}}
-			>
+			<div className="mb-2 text-center font-bold text-[1.1em]">
 				Level: <span data-testid="sudoku-level-label">{level}</span>
 			</div>
-			<div
-				style={{
-					marginBottom: "1em",
-					display: "flex",
-					gap: "0.5em",
-					justifyContent: "center",
-				}}
-			>
+			<div className="mb-4 flex gap-2 justify-center">
 				<button
 					className="px-5 py-2.5 border-none rounded-lg text-base font-semibold cursor-pointer text-white transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)] hover:-translate-y-[1px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)] active:translate-y-[1px] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] bg-green-500 hover:bg-green-600"
 					type="button"
@@ -357,7 +342,7 @@ function App() {
 					</div>
 				))}
 			</div>
-			<div style={{ margin: "1em 0", textAlign: "center" }}>
+			<div className="my-4 text-center">
 				<button className="px-5 py-2.5 border-none rounded-lg text-base font-semibold cursor-pointer text-white transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)] hover:-translate-y-[1px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)] active:translate-y-[1px] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] bg-blue-500 hover:bg-blue-600" type="button" onClick={handleHint}>
 					Get Hint
 				</button>
