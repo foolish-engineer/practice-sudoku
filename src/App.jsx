@@ -289,7 +289,7 @@ function App() {
 								cellClass += " !bg-[#fff59d] transition-colors duration-500";
 							const isUserCell = initialBoard[i][j] === "" && cell !== "";
 							if (isUserCell && !isValid(board, i, j, cell))
-								cellClass += " !border-2 !border-red-500 !outline-2 !outline-red-500 z-[2] !bg-[#fff59d] focus:!bg-[#fff176]";
+								cellClass += " !border-2 !border-red-500 z-[2] !bg-[#fff59d] focus:!bg-[#fff176]";
 							if (
 								animatingValue !== null &&
 								cell !== "" &&
