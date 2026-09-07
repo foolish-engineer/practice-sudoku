@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-function isValid(board, row, col, value) {
+export function isValid(board, row, col, value) {
 	for (let i = 0; i < 9; i++) {
 		if (i !== col && board[row][i] === value) return false;
 		if (i !== row && board[i][col] === value) return false;
@@ -17,8 +17,9 @@ function isValid(board, row, col, value) {
 	return true;
 }
 
-function countSolutions(board, limit = 2) {
-	const b = board.map((row) => [...row]);
+export function countSolutions(board, limit = 2) {
+	// Normalize to numbers so isSafe comparisons work for both string and number boards
+	const b = board.map((row) => row.map((cell) => (cell === "" ? "" : Number(cell))));
 	let count = 0;
 
 	function isSafe(r, c, n) {
@@ -61,7 +62,7 @@ function countSolutions(board, limit = 2) {
 	return count;
 }
 
-function solveSudoku(board) {
+export function solveSudoku(board) {
 	const b = board.map((row) => row.map((cell) => (cell === "" ? 0 : cell)));
 	function isSafe(r, c, n) {
 		for (let i = 0; i < 9; i++) {
@@ -98,7 +99,7 @@ function solveSudoku(board) {
 	return b;
 }
 
-function generateSolvedBoard() {
+export function generateSolvedBoard() {
 	const board = Array.from({ length: 9 }, () => Array(9).fill(""));
 
 	for (let i = 0; i < 9; i += 3) {
@@ -114,7 +115,7 @@ function generateSolvedBoard() {
 	return solveSudoku(board);
 }
 
-function generatePuzzle(difficulty) {
+export function generatePuzzle(difficulty) {
 	let cluesToKeep = 25; // easy
 	if (difficulty === "medium") cluesToKeep = 21;
 	if (difficulty === "hard") cluesToKeep = 19;

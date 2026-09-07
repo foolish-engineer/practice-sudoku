@@ -5,4 +5,8 @@ import { defineConfig } from "vite";
 export default defineConfig({
 	base: "/practice-sudoku/",
 	plugins: [react()],
+	test: {
+		environment: "node",
+		include: ["src/**/*.test.{js,jsx}"],
+	},
 });
