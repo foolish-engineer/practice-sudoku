@@ -242,6 +242,13 @@ function App() {
 		solvedBoard &&
 		board.every((row, i) => row.every((cell, j) => cell === solvedBoard[i][j]));
 
+	// Digits that appear exactly 9 times on the board (fully placed)
+	const completedDigits = new Set(
+		[1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
+			(n) => board.flat().filter((c) => Number(c) === n).length === 9,
+		),
+	);
+
 	return (
 		<div className="max-w-[600px] w-full p-8 bg-white rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] text-center mx-auto">
 			<h1>Sudoku</h1>
@@ -350,11 +357,25 @@ function App() {
 			<div className="text-red-600 min-h-[1.5em] mb-2">
 				{message || (isComplete ? "Congratulations! Puzzle complete." : "")}
 			</div>
-			<div className="text-[0.95em] text-gray-600 mt-4">
-				<p>
-					Fill the grid so that every row, column, and 3x3 box contains the
-					numbers 1-9.
-				</p>
+			{completedDigits.size > 0 && (
+				<div className="mt-3 mb-1">
+					<div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Completed</div>
+					<div className="flex gap-1.5 justify-center flex-wrap">
+						{[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
+							completedDigits.has(n) ? (
+								<span
+									key={n}
+									className="w-7 h-7 rounded-full bg-green-500 text-white text-sm font-bold flex items-center justify-center shadow-sm"
+								>
+									{n}
+								</span>
+							) : null,
+						)}
+					</div>
+				</div>
+			)}
+			<div className="text-[0.95em] text-gray-500 mt-3">
+				Fill every row, column, and 3×3 box with numbers 1–9.
 			</div>
 		</div>
 	);
