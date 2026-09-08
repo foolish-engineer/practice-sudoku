@@ -426,9 +426,10 @@ function App() {
 			</div>
 			<div className="my-4 text-center">
 				<button
-					className="px-5 py-2.5 border-none rounded-lg text-base font-semibold cursor-pointer text-white transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)] hover:-translate-y-[1px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)] active:translate-y-[1px] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] bg-blue-500 hover:bg-blue-600"
+					className="px-5 py-2.5 border-none rounded-lg text-base font-semibold cursor-pointer text-white transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.1)] hover:-translate-y-[1px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)] active:translate-y-[1px] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
 					type="button"
 					onClick={handleHint}
+					disabled={isComplete}
 				>
 					Get Hint
 				</button>
