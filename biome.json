@@ -17,13 +17,24 @@
 		"rules": {
 			"preset": "recommended",
 			"suspicious": {
-				"noArrayIndexKey": "off"
+				"noArrayIndexKey": "off",
+				"noUnknownAtRules": {
+					"level": "error",
+					"options": {
+						"ignore": ["tailwind"]
+					}
+				}
 			}
 		}
 	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
 		}
 	},
 	"assist": {

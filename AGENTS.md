@@ -8,7 +8,7 @@ Welcome to the **Practice Sudoku** repository. Read this file carefully before m
 
 | Layer | Technology |
 |---|---|
-| Framework | React 19 (via Vite 8) |
+| Framework | React 19 (via Vite 8) + **TypeScript** |
 | Styling | **Tailwind CSS v3** |
 | Linter/Formatter | Biome |
 | Deployment | GitHub Pages via `gh-pages` npm package |
@@ -20,13 +20,18 @@ Welcome to the **Practice Sudoku** repository. Read this file carefully before m
 ```
 practice-sudoku/
 ├── src/
-│   ├── App.jsx        # All game logic + UI (single file, intentional)
+│   ├── App.tsx        # All game logic + UI (single file, intentional)
+│   ├── App.test.ts    # Vitest unit test suite
 │   ├── index.css      # Tailwind directives only (@tailwind base/components/utilities)
-│   ├── main.jsx       # React entry point
+│   ├── main.tsx       # React entry point
+│   ├── vite-env.d.ts  # Vite client ambient types
 │   └── assets/        # Static assets (e.g. react logo)
 ├── public/            # Public assets served as-is
 ├── tailwind.config.js # Tailwind v3 config with custom pulse animation
-├── vite.config.js     # Vite config (base: "/practice-sudoku/")
+├── vite.config.ts     # Vite + Vitest config (base: "/practice-sudoku/")
+├── tsconfig.json      # Root project references config
+├── tsconfig.app.json  # App TS config (src/)
+├── tsconfig.node.json # Node TS config (vite.config.ts)
 ├── index.html         # HTML entry point
 ├── package.json
 └── AGENTS.md          # This file
@@ -37,9 +42,9 @@ practice-sudoku/
 ## Code Architecture
 
 ### Single-File Design
-All application logic and UI lives in `src/App.jsx`. **Do not split this into multiple files** unless explicitly asked.
+All application logic and UI lives in `src/App.tsx`. **Do not split this into multiple files** unless explicitly asked.
 
-### Pure Functions (top of App.jsx)
+### Pure Functions (top of App.tsx)
 
 | Function | Description |
 |---|---|
