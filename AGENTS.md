@@ -20,31 +20,49 @@ Welcome to the **Practice Sudoku** repository. Read this file carefully before m
 ```
 practice-sudoku/
 ├── src/
-│   ├── App.tsx        # All game logic + UI (single file, intentional)
-│   ├── App.test.ts    # Vitest unit test suite
-│   ├── index.css      # Tailwind directives only (@tailwind base/components/utilities)
-│   ├── main.tsx       # React entry point
-│   ├── vite-env.d.ts  # Vite client ambient types
-│   └── assets/        # Static assets (e.g. react logo)
-├── public/            # Public assets served as-is
-├── tailwind.config.js # Tailwind v3 config with custom pulse animation
-├── vite.config.ts     # Vite + Vitest config (base: "/practice-sudoku/")
-├── tsconfig.json      # Root project references config
-├── tsconfig.app.json  # App TS config (src/)
-├── tsconfig.node.json # Node TS config (vite.config.ts)
-├── index.html         # HTML entry point
+│   ├── core/                  # Pure domain logic (zero React dependencies)
+│   │   ├── sudoku.ts          # isValid, solveSudoku, countSolutions, generateSolvedBoard, generatePuzzle
+│   │   └── sudoku.test.ts     # Colocated Vitest unit test suite
+│   ├── types/                 # Domain type definitions
+│   │   └── sudoku.ts          # Cell, Board, SolvedBoard, Difficulty, LevelLabel, HintCell
+│   ├── hooks/                 # Custom React hooks (state & business logic)
+│   │   └── useSudokuGame.ts   # Board state, timers, validation, and hint orchestration
+│   ├── components/            # Focused presentation components
+│   │   ├── GameControls.tsx   # Difficulty selector buttons
+│   │   ├── SudokuBoard.tsx    # 9×9 grid container
+│   │   ├── SudokuCell.tsx     # Single cell input + highlight badge button
+│   │   └── CompletedDigits.tsx # 1-9 completion pills
+│   ├── utils/                 # Cross-cutting utilities
+│   │   └── cn.ts              # Class name merger helper
+│   ├── App.tsx                # Composition root shell
+│   ├── index.css              # Tailwind directives only
+│   ├── main.tsx               # React entry point with runtime root assertion
+│   ├── vite-env.d.ts          # Vite client ambient types
+│   └── assets/                # Static assets (e.g. react logo)
+├── public/                    # Public assets served as-is
+├── tailwind.config.js         # Tailwind v3 config with design tokens & animations
+├── vite.config.ts             # Vite + Vitest config (base: "/practice-sudoku/")
+├── tsconfig.json              # Root project references config
+├── tsconfig.app.json          # App TS config (src/)
+├── tsconfig.node.json         # Node TS config (vite.config.ts)
+├── index.html                 # HTML entry point
 ├── package.json
-└── AGENTS.md          # This file
+└── AGENTS.md                  # This file
 ```
 
 ---
 
 ## Code Architecture
 
-### Single-File Design
-All application logic and UI lives in `src/App.tsx`. **Do not split this into multiple files** unless explicitly asked.
+### Layered Architecture
+The codebase follows standard FAANG clean architecture:
+- **`core/`**: Pure algorithms with zero UI coupling. Fully tested in isolation via colocated test files.
+- **`types/`**: Single source of truth for domain data structures.
+- **`hooks/`**: Encapsulates stateful game mechanics, timer lifecycles, and event handlers.
+- **`components/`**: Pure presentational React components using Tailwind CSS design tokens.
+- **`App.tsx`**: Composition shell bringing the layers together.
 
-### Pure Functions (top of App.tsx)
+### Pure Functions (`src/core/sudoku.ts`)
 
 | Function | Description |
 |---|---|

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { Board, SolvedBoard } from "./App.tsx";
+import type { Board, SolvedBoard } from "../types/sudoku";
 import {
 	countSolutions,
 	generatePuzzle,
 	generateSolvedBoard,
 	isValid,
 	solveSudoku,
-} from "./App.tsx";
+} from "./sudoku";
 
 // ---------------------------------------------------------------------------
 // Helpers
