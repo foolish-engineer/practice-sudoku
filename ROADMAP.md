@@ -10,7 +10,7 @@
 > Prerequisite layer. Sets up the safety net before anything else.
 
 - [x] **TypeScript** — migrate `App.jsx` → `App.tsx`, define types (`Cell`, `Board`, `Difficulty`, `HintCell`), install `typescript`
-- [ ] **Code coverage** — install `@vitest/coverage-v8`, add `npm run test:coverage`, enforce 80%+ threshold in CI
+- [x] **Code coverage** — install `@vitest/coverage-v8`, add `npm run test:coverage`, enforce 80%+ threshold in CI
 - [x] **Pre-commit hook** — Husky + lint-staged: Biome auto-fix on staged files before every commit
 - [x] **Pre-push hook** — Husky: runs full `npm run test` suite before every push
 - [ ] **GitHub Actions CI** — on every push and PR: lint → test → coverage threshold → build
@@ -81,10 +81,10 @@
 
 | Phase | Items | Done |
 |---|---|---|
-| Phase 1 — Foundation | 6 | 3 |
+| Phase 1 — Foundation | 6 | 4 |
 | Phase 2 — Quality & Reliability | 4 | 0 |
 | Phase 3 — Accessibility | 6 | 0 |
 | Phase 4 — Core Features | 5 | 0 |
 | Phase 5 — UX & Polish | 5 | 0 |
 | Phase 6 — Distribution | 4 | 0 |
-| **Total** | **30** | **3** |
+| **Total** | **30** | **4** |

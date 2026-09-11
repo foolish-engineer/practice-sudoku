@@ -8,5 +8,16 @@ export default defineConfig({
 	test: {
 		environment: "node",
 		include: ["src/**/*.test.{js,jsx,ts,tsx}"],
+		coverage: {
+			provider: "v8",
+			reporter: ["text", "json", "html"],
+			include: ["src/core/**/*.ts"],
+			thresholds: {
+				statements: 80,
+				branches: 80,
+				functions: 80,
+				lines: 80,
+			},
+		},
 	},
 });
