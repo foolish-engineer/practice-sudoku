@@ -21,8 +21,8 @@
 		"lint:fix": "biome check --write ."
 	},
 	"lint-staged": {
-		"*.{js,ts,jsx,tsx,json,css,md}": [
-			"biome check --write"
+		"*.{js,ts,jsx,tsx,json,css}": [
+			"biome check --write --no-errors-on-unmatched"
 		]
 	},
 	"dependencies": {
