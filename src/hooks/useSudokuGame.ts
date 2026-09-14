@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { generatePuzzle, isValid } from "../core/sudoku";
 import type {
 	Board,
@@ -8,6 +8,10 @@ import type {
 	LevelLabel,
 	SolvedBoard,
 } from "../types/sudoku";
+import type {
+	GeneratePuzzleRequest,
+	PuzzleWorkerResponse,
+} from "../workers/puzzleWorker";
 
 const emptyBoard = (): Board =>
 	Array.from({ length: 9 }, () => Array(9).fill(""));
@@ -26,25 +30,98 @@ export function useSudokuGame() {
 	const [level, setLevel] = useState<LevelLabel>("Easy");
 	const [solvedBoard, setSolvedBoard] = useState<SolvedBoard | null>(null);
 	const [animatingValue, setAnimatingValue] = useState<Cell | null>(null);
+	const [isGenerating, setIsGenerating] = useState(false);
 
 	const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const workerRef = useRef<Worker | null>(null);
+	const requestIdRef = useRef<number>(0);
 
-	// Initialize board with easy puzzle on mount
-	useEffect(() => {
-		const { puzzleBoard, solvedBoard } = generatePuzzle("easy");
-		setInitialBoard(puzzleBoard);
-		setBoard(puzzleBoard.map((row) => [...row]));
-		setSolvedBoard(solvedBoard);
+	const handleNewSudoku = useCallback((difficulty: Difficulty) => {
+		const nextRequestId = ++requestIdRef.current;
+		setIsGenerating(true);
 		setMessage("");
 		setHintCell(null);
-		setLevel("Easy");
+		setLevel(LABEL_MAP[difficulty]);
+
+		if (animTimerRef.current) clearTimeout(animTimerRef.current);
+		setAnimatingValue(null);
+
+		if (workerRef.current) {
+			const request: GeneratePuzzleRequest = {
+				type: "GENERATE_PUZZLE",
+				difficulty,
+				id: nextRequestId,
+			};
+			workerRef.current.postMessage(request);
+		} else {
+			// Fallback if Web Workers are unavailable (e.g. Node/SSR test environments)
+			try {
+				const { puzzleBoard, solvedBoard } = generatePuzzle(difficulty);
+				if (nextRequestId === requestIdRef.current) {
+					setInitialBoard(puzzleBoard);
+					setBoard(puzzleBoard.map((row) => [...row]));
+					setSolvedBoard(solvedBoard);
+				}
+			} catch {
+				setMessage("Failed to generate puzzle. Please try again.");
+			} finally {
+				if (nextRequestId === requestIdRef.current) {
+					setIsGenerating(false);
+				}
+			}
+		}
+	}, []);
+
+	// Initialize Web Worker and generate initial puzzle
+	useEffect(() => {
+		if (typeof Worker !== "undefined") {
+			try {
+				const worker = new Worker(
+					new URL("../workers/puzzleWorker.ts", import.meta.url),
+					{ type: "module" },
+				);
+
+				worker.onmessage = (event: MessageEvent<PuzzleWorkerResponse>) => {
+					const data = event.data;
+					if (data.id !== requestIdRef.current) return;
+
+					if (data.type === "PUZZLE_GENERATED") {
+						const { puzzleBoard, solvedBoard } = data.result;
+						setInitialBoard(puzzleBoard);
+						setBoard(puzzleBoard.map((row) => [...row]));
+						setSolvedBoard(solvedBoard);
+						setIsGenerating(false);
+					} else if (data.type === "PUZZLE_ERROR") {
+						setMessage("Failed to generate puzzle. Please try again.");
+						setIsGenerating(false);
+					}
+				};
+
+				worker.onerror = () => {
+					setMessage("Puzzle generator worker error.");
+					setIsGenerating(false);
+					// Null out the dead worker so the next call falls back to the sync path
+					workerRef.current = null;
+				};
+
+				workerRef.current = worker;
+			} catch {
+				workerRef.current = null;
+			}
+		}
+
+		handleNewSudoku("easy");
 
 		return () => {
 			if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
 			if (animTimerRef.current) clearTimeout(animTimerRef.current);
+			if (workerRef.current) {
+				workerRef.current.terminate();
+				workerRef.current = null;
+			}
 		};
-	}, []);
+	}, [handleNewSudoku]);
 
 	const handleAnimateSame = (val: Cell) => {
 		if (!val) return;
@@ -56,6 +133,7 @@ export function useSudokuGame() {
 	};
 
 	const handleChange = (row: number, col: number, val: string) => {
+		if (isGenerating) return;
 		if (val === "" || /^[1-9]$/.test(val)) {
 			const numVal: Cell = val === "" ? "" : Number(val);
 			const newBoard: Board = board.map((r, i) =>
@@ -72,20 +150,8 @@ export function useSudokuGame() {
 		}
 	};
 
-	const handleNewSudoku = (difficulty: Difficulty) => {
-		const { puzzleBoard, solvedBoard } = generatePuzzle(difficulty);
-		setInitialBoard(puzzleBoard);
-		setBoard(puzzleBoard.map((row) => [...row]));
-		setSolvedBoard(solvedBoard);
-		if (animTimerRef.current) clearTimeout(animTimerRef.current);
-		setAnimatingValue(null);
-		setMessage("");
-		setHintCell(null);
-		setLevel(LABEL_MAP[difficulty]);
-	};
-
 	const handleHint = () => {
-		if (!solvedBoard) return;
+		if (!solvedBoard || isGenerating) return;
 		const incorrects: [number, number][] = [];
 		for (let i = 0; i < 9; i++) {
 			for (let j = 0; j < 9; j++) {
@@ -133,6 +199,7 @@ export function useSudokuGame() {
 		animatingValue,
 		isComplete,
 		completedDigits,
+		isGenerating,
 		handleChange,
 		handleNewSudoku,
 		handleHint,

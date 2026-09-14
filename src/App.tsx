@@ -22,6 +22,7 @@ function App() {
 		animatingValue,
 		isComplete,
 		completedDigits,
+		isGenerating,
 		handleChange,
 		handleNewSudoku,
 		handleHint,
@@ -35,13 +36,17 @@ function App() {
 				Level: <span data-testid="sudoku-level-label">{level}</span>
 			</div>
 
-			<GameControls onSelectDifficulty={handleNewSudoku} />
+			<GameControls
+				onSelectDifficulty={handleNewSudoku}
+				disabled={isGenerating}
+			/>
 
 			<SudokuBoard
 				board={board}
 				initialBoard={initialBoard}
 				hintCell={hintCell}
 				animatingValue={animatingValue}
+				isGenerating={isGenerating}
 				onChange={handleChange}
 				onAnimateSame={handleAnimateSame}
 			/>
@@ -51,7 +56,7 @@ function App() {
 					className={cn(BTN_BASE, BTN_VARIANTS.hint)}
 					type="button"
 					onClick={handleHint}
-					disabled={isComplete}
+					disabled={isComplete || isGenerating}
 				>
 					Get Hint
 				</button>

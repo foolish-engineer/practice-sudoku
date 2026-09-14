@@ -7,6 +7,7 @@ interface SudokuBoardProps {
 	initialBoard: Board;
 	hintCell: HintCell;
 	animatingValue: Cell | null;
+	isGenerating?: boolean;
 	onChange: (row: number, col: number, val: string) => void;
 	onAnimateSame: (val: Cell) => void;
 }
@@ -16,11 +17,24 @@ export function SudokuBoard({
 	initialBoard,
 	hintCell,
 	animatingValue,
+	isGenerating = false,
 	onChange,
 	onAnimateSame,
 }: SudokuBoardProps) {
 	return (
-		<div className="my-6 inline-block">
+		<div className="my-6 inline-block relative">
+			{isGenerating && (
+				<div
+					className="absolute inset-0 bg-white/75 backdrop-blur-[1px] flex flex-col items-center justify-center rounded-lg z-20"
+					role="status"
+					aria-live="polite"
+				>
+					<div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-2" />
+					<span className="text-sm font-semibold text-gray-700">
+						Generating puzzle...
+					</span>
+				</div>
+			)}
 			{board.map((row, i) => (
 				<div key={`row-${i}`} className="flex justify-center">
 					{row.map((cell, j) => {
