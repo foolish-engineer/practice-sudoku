@@ -43,6 +43,7 @@ export function SudokuCell({
 	return (
 		<div className="relative inline-flex">
 			<input
+				data-testid={`cell-${row}-${col}`}
 				className={cellClass}
 				type="text"
 				maxLength={1}

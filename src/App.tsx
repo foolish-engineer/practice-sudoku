@@ -53,6 +53,7 @@ function App() {
 
 			<div className="my-4 text-center">
 				<button
+					data-testid="hint-button"
 					className={cn(BTN_BASE, BTN_VARIANTS.hint)}
 					type="button"
 					onClick={handleHint}
@@ -62,7 +63,10 @@ function App() {
 				</button>
 			</div>
 
-			<div className="text-red-600 min-h-[1.5em] mb-2">
+			<div
+				data-testid="status-message"
+				className="text-red-600 min-h-[1.5em] mb-2"
+			>
 				{message || (isComplete ? "Congratulations! Puzzle complete." : "")}
 			</div>
 

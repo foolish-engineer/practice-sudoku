@@ -25,6 +25,7 @@ export function SudokuBoard({
 		<div className="my-6 inline-block relative">
 			{isGenerating && (
 				<div
+					data-testid="generating-overlay"
 					className="absolute inset-0 bg-white/75 backdrop-blur-[1px] flex flex-col items-center justify-center rounded-lg z-20"
 					role="status"
 					aria-live="polite"

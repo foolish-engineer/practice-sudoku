@@ -15,6 +15,7 @@ export function CompletedDigits({ completedDigits }: CompletedDigitsProps) {
 							completedDigits.has(n) ? (
 								<span
 									key={n}
+									data-testid={`completed-digit-${n}`}
 									className="w-7 h-7 rounded-full bg-green-500 text-white text-sm font-bold flex items-center justify-center shadow-sm"
 								>
 									{n}
