@@ -73,7 +73,6 @@ export function useSudokuGame() {
 		}
 	}, []);
 
-	// Initialize Web Worker and generate initial puzzle
 	useEffect(() => {
 		if (typeof Worker !== "undefined") {
 			try {
@@ -185,7 +184,6 @@ export function useSudokuGame() {
 		[board, solvedBoard],
 	);
 
-	// Digits that appear exactly 9 times on the board (fully placed)
 	const completedDigits = useMemo(() => {
 		const flatBoard = board.flat();
 		return new Set(
