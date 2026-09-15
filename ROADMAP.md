@@ -14,7 +14,7 @@
 - [x] **Pre-commit hook** — Husky + lint-staged: Biome auto-fix on staged files before every commit
 - [x] **Pre-push hook** — Husky: runs full `npm run test` suite before every push
 - [x] **GitHub Actions CI** — on every push and PR: lint → test → coverage threshold → build
-- [x] **GitHub Actions CD** — on merge to `main`: auto-deploy to GitHub Pages (replaces manual `npm run deploy`)
+- [x] **GitHub Actions CD** — on merge to `main`: auto-deploy to GitHub Pages via `actions/deploy-pages` (zero secrets, no manual step)
 
 ---
 
