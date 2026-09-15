@@ -1,10 +1,10 @@
-name: CI
+name: CI / CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -51,6 +51,14 @@ jobs:
           path: coverage/
           retention-days: 14
 
+      # Upload the built dist/ as a Pages artifact for the deploy job.
+      # Only runs on main-branch pushes — PRs never deploy so don't waste the upload.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          path: dist/
+
   # ---------------------------------------------------------------------------
   # Job 2: Playwright E2E tests (depends on ci job passing)
   # ---------------------------------------------------------------------------
@@ -85,3 +93,35 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # Job 3: Deploy to GitHub Pages
+  # Runs only on push to main, and only after BOTH ci and e2e pass.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [ci, e2e]
+    # Only deploy on direct pushes to main — never on pull requests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    # Dedicated concurrency group for deploys — never cancel in-progress.
+    # The top-level group (cancel-in-progress: true) would interrupt an active
+    # deploy mid-push if a second commit lands quickly.
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
+
+    # Required permissions for the deploy-pages action
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
