@@ -11,7 +11,9 @@ Welcome to the **Practice Sudoku** repository. Read this file carefully before m
 | Framework | React 19 (via Vite 8) + **TypeScript** |
 | Styling | **Tailwind CSS v3** |
 | Linter/Formatter | Biome |
-| Deployment | GitHub Pages via `gh-pages` npm package |
+| Testing (unit) | Vitest + `@vitest/coverage-v8` |
+| Testing (E2E) | Playwright (system Chrome) |
+| Deployment | GitHub Actions → GitHub Pages (`actions/deploy-pages`) |
 
 ---
 
@@ -19,6 +21,11 @@ Welcome to the **Practice Sudoku** repository. Read this file carefully before m
 
 ```
 practice-sudoku/
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # CI (lint, test, build) + CD (deploy to GitHub Pages)
+├── e2e/
+│   └── sudoku.spec.ts         # Playwright E2E test suite (10 tests, 3 workers)
 ├── src/
 │   ├── core/                  # Pure domain logic (zero React dependencies)
 │   │   ├── sudoku.ts          # isValid, solveSudoku, countSolutions, generateSolvedBoard, generatePuzzle
@@ -27,9 +34,13 @@ practice-sudoku/
 │   │   └── sudoku.ts          # Cell, Board, SolvedBoard, Difficulty, LevelLabel, HintCell
 │   ├── hooks/                 # Custom React hooks (state & business logic)
 │   │   └── useSudokuGame.ts   # Board state, timers, validation, and hint orchestration
+│   ├── workers/               # Web Worker for off-thread puzzle generation
+│   │   ├── puzzleWorker.ts    # Worker script — handles GENERATE_PUZZLE messages
+│   │   └── puzzleWorker.test.ts # Type contract tests for the worker message shape
 │   ├── components/            # Focused presentation components
+│   │   ├── ErrorBoundary.tsx  # React error boundary — catches solver failures gracefully
 │   │   ├── GameControls.tsx   # Difficulty selector buttons
-│   │   ├── SudokuBoard.tsx    # 9×9 grid container
+│   │   ├── SudokuBoard.tsx    # 9×9 grid container + generating overlay
 │   │   ├── SudokuCell.tsx     # Single cell input + highlight badge button
 │   │   └── CompletedDigits.tsx # 1-9 completion pills
 │   ├── utils/                 # Cross-cutting utilities
@@ -37,14 +48,14 @@ practice-sudoku/
 │   ├── App.tsx                # Composition root shell
 │   ├── index.css              # Tailwind directives only
 │   ├── main.tsx               # React entry point with runtime root assertion
-│   ├── vite-env.d.ts          # Vite client ambient types
-│   └── assets/                # Static assets (e.g. react logo)
+│   └── vite-env.d.ts          # Vite client ambient types
 ├── public/                    # Public assets served as-is
+├── playwright.config.ts       # Playwright config (port 5174, system Chrome, 3 workers)
 ├── tailwind.config.js         # Tailwind v3 config with design tokens & animations
 ├── vite.config.ts             # Vite + Vitest config (base: "/practice-sudoku/")
 ├── tsconfig.json              # Root project references config
 ├── tsconfig.app.json          # App TS config (src/)
-├── tsconfig.node.json         # Node TS config (vite.config.ts)
+├── tsconfig.node.json         # Node TS config (vite.config.ts, playwright.config.ts, e2e/)
 ├── index.html                 # HTML entry point
 ├── package.json
 └── AGENTS.md                  # This file
@@ -59,6 +70,7 @@ The codebase follows standard FAANG clean architecture:
 - **`core/`**: Pure algorithms with zero UI coupling. Fully tested in isolation via colocated test files.
 - **`types/`**: Single source of truth for domain data structures.
 - **`hooks/`**: Encapsulates stateful game mechanics, timer lifecycles, and event handlers.
+- **`workers/`**: Web Worker for off-thread puzzle generation. Communicates via `postMessage` / `onmessage`.
 - **`components/`**: Pure presentational React components using Tailwind CSS design tokens.
 - **`App.tsx`**: Composition shell bringing the layers together.
 
@@ -79,7 +91,11 @@ The codebase follows standard FAANG clean architecture:
 | Medium | 21 |
 | Hard | 19 |
 
-### State Management (inside `App` component)
+### Web Worker (`src/workers/puzzleWorker.ts`)
+
+Puzzle generation runs in a dedicated Web Worker to keep the main thread unblocked. The hook (`useSudokuGame`) sends a `GENERATE_PUZZLE` message with a `difficulty` and an `id`. The worker responds with `{ puzzleBoard, solvedBoard, id }`. A `requestIdRef` in the hook guards against stale responses from cancelled requests.
+
+### State Management (`src/hooks/useSudokuGame.ts`)
 
 | State | Type | Description |
 |---|---|---|
@@ -90,11 +106,12 @@ The codebase follows standard FAANG clean architecture:
 | `level` | `string` | Display label: `"Easy"`, `"Medium"`, or `"Hard"`. |
 | `animatingValue` | `number \| null` | When set, all cells matching this value get the pulse animation. Cleared after 3 seconds via `animTimerRef`. |
 | `message` | `string` | Status message shown below the board (e.g., `"Invalid move!"`). |
+| `isGenerating` | `boolean` | True while the Web Worker is running — disables all controls and shows the overlay. |
 
 ### Key Handlers
 
-- **`handleChange(row, col, val)`** — Updates `board` state, runs `isValid` to set `message`. Only accepts `""` or `[1-9]`.
-- **`handleNewSudoku(difficulty)`** — Generates a new puzzle, resets all state.
+- **`handleChange(row, col, val)`** — Updates `board` state, runs `isValid` to set `message`. Only accepts `""` or `[1-9]`. Guards against interaction during generation.
+- **`handleNewSudoku(difficulty)`** — Posts a `GENERATE_PUZZLE` message to the worker, sets `isGenerating: true`, resets all state.
 - **`handleHint()`** — Finds all cells that differ from `solvedBoard`, picks a random one, fills it in, and sets `hintCell` for 6 seconds.
 - **`handleAnimateSame(val)`** — Sets `animatingValue` to animate all matching cells for 3 seconds.
 
@@ -126,22 +143,34 @@ The codebase follows standard FAANG clean architecture:
 1. **`isValid` uses self-exclusion**: When checking validity, the cell's own current value is excluded from the conflict check. Never simplify this to a naive check — it will break real-time validation for pre-filled cells.
 2. **Board values are mixed types**: `initialBoard` cells are either a `number` or `""`. `solvedBoard` cells are always `number`. `board` cells are `number | ""`. Always use `Number(cell)` when comparing.
 3. **`solveSudoku` uses `0` for empty**: Internally it converts `""` → `0`. Do not pass a board with `""` directly into it or compare with `""` inside it.
-4. **Vite base path**: `vite.config.js` sets `base: "/practice-sudoku/"`. This is required for GitHub Pages and must not be changed.
+4. **Vite base path**: `vite.config.ts` sets `base: "/practice-sudoku/"`. This is required for GitHub Pages and must not be changed.
 5. **No state reset on animation**: `animatingValue` only resets via a `setTimeout`. Do not reset it during board updates — let the timer do it.
 6. **`countSolutions` is intentionally slow for hard puzzles**: It uses backtracking with an early-exit at `limit=2`. This is acceptable; do not replace it with a lookup table or skip it.
+7. **Worker stale-response guard**: `requestIdRef` in `useSudokuGame` increments on every new puzzle request. The worker response is ignored if its `id` doesn't match the current ref. Never remove this guard.
+8. **E2E uses port 5174**: `playwright.config.ts` runs Vite on `--port 5174` (not 5173) to avoid collisions with other local dev servers. Do not change this port without updating the config.
+9. **No manual deploy**: `npm run deploy` has been removed. Deployment is fully automated via GitHub Actions on every push to `main`. Use `git push` to deploy.
 
 ---
 
 ## Workflow Commands
 
 ```sh
-npm run dev       # Start local dev server (Vite HMR)
-npm run build     # Production build to dist/
-npm run deploy    # Build + push to gh-pages branch on GitHub
-npm run lint      # Run Biome linter
-npm run lint:fix  # Auto-fix lint issues with Biome
-npm run format    # Format code with Biome
+npm run dev            # Start local dev server (Vite HMR)
+npm run build          # Production build to dist/
+npm run preview        # Preview the production build locally
+
+npm run typecheck      # TypeScript type-check (all tsconfig projects)
+npm run lint           # Run Biome linter
+npm run lint:fix       # Auto-fix lint issues with Biome
+npm run format         # Format code with Biome
+
+npm run test           # Run unit tests (Vitest)
+npm run test:watch     # Unit tests in watch mode
+npm run test:coverage  # Unit tests with V8 coverage report
+npm run test:e2e       # Run Playwright E2E tests (3 parallel workers)
+npm run test:e2e:ui    # Playwright interactive UI mode
+npm run test:e2e:headed  # E2E tests in headed Chrome (visible browser)
+npm run test:e2e:report  # Open last Playwright HTML report
 ```
 
-> **Deployment note**: Always use `npm run deploy`. Do not push to the `gh-pages` branch manually via git.
-
+> **Deployment**: Push to `main`. GitHub Actions runs lint → unit tests → E2E tests → deploy. All three gates must pass.
