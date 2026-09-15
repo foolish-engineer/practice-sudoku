@@ -37,6 +37,10 @@ async function getFirstEmptyCell(page: import("@playwright/test").Page) {
 // ---------------------------------------------------------------------------
 
 test.describe("Sudoku App", () => {
+	// Run all tests in this file in parallel across workers.
+	// Each test gets its own browser context so there is no shared state.
+	test.describe.configure({ mode: "parallel" });
+
 	test.beforeEach(async ({ page }) => {
 		await page.goto("/practice-sudoku/");
 	});

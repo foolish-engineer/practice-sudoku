@@ -13,8 +13,8 @@ export default defineConfig({
 	expect: { timeout: 10_000 },
 	// Re-run failed tests once on CI
 	retries: process.env.CI ? 1 : 0,
-	// Parallel workers — single worker in CI for determinism
-	workers: process.env.CI ? 1 : undefined,
+	// Parallel workers: 3 locally, 1 on CI for determinism
+	workers: process.env.CI ? 1 : 3,
 	// Reporters
 	reporter: process.env.CI
 		? [["github"], ["html", { open: "never" }]]
