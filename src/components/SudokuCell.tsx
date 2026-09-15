@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Cell } from "../types/sudoku";
 import { cn } from "../utils/cn";
 
@@ -16,7 +17,7 @@ interface SudokuCellProps {
 	onAnimateSame: (val: Cell) => void;
 }
 
-export function SudokuCell({
+export const SudokuCell = memo(function SudokuCell({
 	row,
 	col,
 	value,
@@ -80,4 +81,4 @@ export function SudokuCell({
 			)}
 		</div>
 	);
-}
+});

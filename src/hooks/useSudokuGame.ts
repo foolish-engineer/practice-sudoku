@@ -123,34 +123,37 @@ export function useSudokuGame() {
 		};
 	}, [handleNewSudoku]);
 
-	const handleAnimateSame = (val: Cell) => {
+	const handleAnimateSame = useCallback((val: Cell) => {
 		if (!val) return;
 		setAnimatingValue(val);
 		if (animTimerRef.current) clearTimeout(animTimerRef.current);
 		animTimerRef.current = setTimeout(() => {
 			setAnimatingValue(null);
 		}, 3000);
-	};
+	}, []);
 
-	const handleChange = (row: number, col: number, val: string) => {
-		if (isGenerating) return;
-		if (val === "" || /^[1-9]$/.test(val)) {
-			const numVal: Cell = val === "" ? "" : Number(val);
-			const newBoard: Board = board.map((r, i) =>
-				r.map((c, j) => (i === row && j === col ? numVal : c)),
-			);
-			setBoard(newBoard);
-			if (numVal !== "" && !isValid(newBoard, row, col, numVal)) {
-				setMessage("Invalid move!");
+	const handleChange = useCallback(
+		(row: number, col: number, val: string) => {
+			if (isGenerating) return;
+			if (val === "" || /^[1-9]$/.test(val)) {
+				const numVal: Cell = val === "" ? "" : Number(val);
+				const newBoard: Board = board.map((r, i) =>
+					r.map((c, j) => (i === row && j === col ? numVal : c)),
+				);
+				setBoard(newBoard);
+				if (numVal !== "" && !isValid(newBoard, row, col, numVal)) {
+					setMessage("Invalid move!");
+				} else {
+					setMessage("");
+				}
 			} else {
-				setMessage("");
+				setMessage("Invalid move!");
 			}
-		} else {
-			setMessage("Invalid move!");
-		}
-	};
+		},
+		[board, isGenerating],
+	);
 
-	const handleHint = () => {
+	const handleHint = useCallback(() => {
 		if (!solvedBoard || isGenerating) return;
 		const incorrects: [number, number][] = [];
 		for (let i = 0; i < 9; i++) {
@@ -171,13 +174,15 @@ export function useSudokuGame() {
 
 		if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
 		hintTimerRef.current = setTimeout(() => setHintCell(null), 6000);
-	};
+	}, [board, initialBoard, isGenerating, solvedBoard]);
 
-	const isComplete = Boolean(
-		solvedBoard != null &&
+	const isComplete = useMemo(
+		() =>
+			solvedBoard != null &&
 			board.every((row, i) =>
 				row.every((cell, j) => cell === solvedBoard[i][j]),
 			),
+		[board, solvedBoard],
 	);
 
 	// Digits that appear exactly 9 times on the board (fully placed)

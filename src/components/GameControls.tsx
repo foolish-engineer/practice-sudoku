@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Difficulty } from "../types/sudoku";
 import { cn } from "../utils/cn";
 
@@ -19,7 +20,7 @@ interface GameControlsProps {
 	disabled?: boolean;
 }
 
-export function GameControls({
+export const GameControls = memo(function GameControls({
 	onSelectDifficulty,
 	disabled = false,
 }: GameControlsProps) {
@@ -51,4 +52,4 @@ export function GameControls({
 			</button>
 		</div>
 	);
-}
+});

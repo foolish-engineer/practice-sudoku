@@ -24,7 +24,7 @@
 
 - [x] **Error Boundary** — wrap the app in a React `ErrorBoundary` so solver failures show a friendly message instead of a blank screen
 - [x] **Web Worker** — move `generatePuzzle` + helpers into a `puzzleWorker.js` Web Worker to unblock the UI thread; add a loading spinner while generating
-- [ ] **React performance** — memoize `completedDigits` and cell class computations with `useMemo`; wrap handlers with `useCallback`
+- [x] **React performance** — `useCallback` on all handlers, `useMemo` on `isComplete` + `completedDigits`; `React.memo` on `SudokuCell` and `GameControls`
 - [x] **E2E tests (Playwright)** — test rendered UI: typing in cells, red border on invalid, hint highlight, puzzle completion, new game buttons
 
 ---
