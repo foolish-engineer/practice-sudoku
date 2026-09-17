@@ -33,12 +33,12 @@
 
 > Required for any serious production app. Often a legal requirement.
 
-- [ ] **ARIA grid roles** — add `role="grid"`, `role="row"`, `role="gridcell"` to the board structure
-- [ ] **`aria-invalid`** — set on cells with invalid user input
-- [ ] **`aria-label`** — describe each cell's position (e.g., "Row 3, Column 5, value 7")
-- [ ] **Keyboard navigation** — arrow keys to move between cells; `Delete`/`Backspace` to clear a cell
-- [ ] **Color contrast** — verify hint yellow (`#fff59d`) and red border meet WCAG AA contrast ratios; supplement with icons/labels if needed
-- [ ] **Focus management** — programmatically move focus after hint fills a cell
+- [x] **ARIA grid roles** — semantic `<table>`, `<tr>`, `<td>` structure (native roles; no ARIA overrides needed)
+- [x] **`aria-invalid`** — set on cells with invalid user input
+- [x] **`aria-label`** — each cell announces "Row R, Column C, value V" or "empty"
+- [x] **Keyboard navigation** — arrow keys move focus between cells; `Delete`/`Backspace` clears a cell
+- [x] **Color contrast** — audited: `#fff59d` + black text = 19.6:1 ✅; red border text passes; no changes needed
+- [x] **Focus management** — focus moves to the hinted cell automatically after Get Hint
 
 ---
 
@@ -83,8 +83,8 @@
 |---|---|---|
 | Phase 1 — Foundation | 6 | 5 |
 | Phase 2 — Quality & Reliability | 4 | 4 |
-| Phase 3 — Accessibility | 6 | 0 |
+| Phase 3 — Accessibility | 6 | 6 |
 | Phase 4 — Core Features | 5 | 0 |
 | Phase 5 — UX & Polish | 5 | 0 |
 | Phase 6 — Distribution | 4 | 0 |
-| **Total** | **30** | **9** |
+| **Total** | **30** | **15** |

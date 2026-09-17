@@ -41,15 +41,25 @@ export const SudokuCell = memo(function SudokuCell({
 		isAnimating && "animate-pulse-highlight z-[5] relative",
 	);
 
+	const ariaLabel = `Row ${row + 1}, Column ${col + 1}${value !== "" ? `, value ${value}` : ", empty"}`;
+
 	return (
-		<div className="relative inline-flex">
+		<td className="relative p-0">
 			<input
 				data-testid={`cell-${row}-${col}`}
 				className={cellClass}
 				type="text"
+				inputMode="numeric"
 				maxLength={1}
 				value={value}
+				aria-label={ariaLabel}
+				aria-invalid={isInvalid}
 				onChange={(e) => onChange(row, col, e.target.value)}
+				onKeyDown={(e) => {
+					if (e.key === "Delete" || e.key === "Backspace") {
+						onChange(row, col, "");
+					}
+				}}
 				disabled={isInitial}
 			/>
 			{value !== "" && (
@@ -79,6 +89,6 @@ export const SudokuCell = memo(function SudokuCell({
 					</svg>
 				</button>
 			)}
-		</div>
+		</td>
 	);
 });

@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from "react";
 import { isValid } from "../core/sudoku";
 import type { Board, Cell, HintCell } from "../types/sudoku";
 import { SudokuCell } from "./SudokuCell";
@@ -21,6 +22,58 @@ export function SudokuBoard({
 	onChange,
 	onAnimateSame,
 }: SudokuBoardProps) {
+	// Move focus to the hint cell whenever a hint is applied
+	useEffect(() => {
+		if (!hintCell) return;
+		document
+			.querySelector<HTMLElement>(
+				`[data-testid="cell-${hintCell.row}-${hintCell.col}"]`,
+			)
+			?.focus();
+	}, [hintCell]);
+
+	// Arrow-key navigation via event delegation — one handler on the grid
+	// container instead of 81 individual handlers, keeping SudokuCell props stable.
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLTableElement>) => {
+			const target = e.target as HTMLElement;
+			const testId = target.dataset.testid;
+			if (!testId?.startsWith("cell-")) return;
+
+			const parts = testId.split("-");
+			const row = Number(parts[1]);
+			const col = Number(parts[2]);
+
+			let nextRow = row;
+			let nextCol = col;
+
+			switch (e.key) {
+				case "ArrowUp":
+					nextRow = (row + 8) % 9;
+					break;
+				case "ArrowDown":
+					nextRow = (row + 1) % 9;
+					break;
+				case "ArrowLeft":
+					nextCol = (col + 8) % 9;
+					break;
+				case "ArrowRight":
+					nextCol = (col + 1) % 9;
+					break;
+				default:
+					return;
+			}
+
+			e.preventDefault();
+			document
+				.querySelector<HTMLElement>(
+					`[data-testid="cell-${nextRow}-${nextCol}"]`,
+				)
+				?.focus();
+		},
+		[],
+	);
+
 	return (
 		<div className="my-6 inline-block relative">
 			{isGenerating && (
@@ -36,38 +89,46 @@ export function SudokuBoard({
 					</span>
 				</div>
 			)}
-			{board.map((row, i) => (
-				<div key={`row-${i}`} className="flex justify-center">
-					{row.map((cell, j) => {
-						const isInitial = initialBoard[i][j] !== "";
-						const isUserCell = !isInitial && cell !== "";
-						const isInvalid = isUserCell && !isValid(board, i, j, cell);
-						const isHint = Boolean(
-							hintCell && hintCell.row === i && hintCell.col === j,
-						);
-						const isAnimating = Boolean(
-							animatingValue !== null &&
-								cell !== "" &&
-								Number(cell) === Number(animatingValue),
-						);
+			<table
+				aria-label="Sudoku puzzle"
+				aria-busy={isGenerating}
+				onKeyDown={handleKeyDown}
+			>
+				<tbody>
+					{board.map((row, i) => (
+						<tr key={`row-${i}`}>
+							{row.map((cell, j) => {
+								const isInitial = initialBoard[i][j] !== "";
+								const isUserCell = !isInitial && cell !== "";
+								const isInvalid = isUserCell && !isValid(board, i, j, cell);
+								const isHint = Boolean(
+									hintCell && hintCell.row === i && hintCell.col === j,
+								);
+								const isAnimating = Boolean(
+									animatingValue !== null &&
+										cell !== "" &&
+										Number(cell) === Number(animatingValue),
+								);
 
-						return (
-							<SudokuCell
-								key={`cell-wrap-${i}-${j}`}
-								row={i}
-								col={j}
-								value={cell}
-								isInitial={isInitial}
-								isHint={isHint}
-								isInvalid={isInvalid}
-								isAnimating={isAnimating}
-								onChange={onChange}
-								onAnimateSame={onAnimateSame}
-							/>
-						);
-					})}
-				</div>
-			))}
+								return (
+									<SudokuCell
+										key={`cell-wrap-${i}-${j}`}
+										row={i}
+										col={j}
+										value={cell}
+										isInitial={isInitial}
+										isHint={isHint}
+										isInvalid={isInvalid}
+										isAnimating={isAnimating}
+										onChange={onChange}
+										onAnimateSame={onAnimateSame}
+									/>
+								);
+							})}
+						</tr>
+					))}
+				</tbody>
+			</table>
 		</div>
 	);
 }
