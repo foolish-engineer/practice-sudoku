@@ -13,6 +13,7 @@ export const BTN_VARIANTS = {
 	medium: "bg-orange-500 hover:bg-orange-600",
 	hard: "bg-red-500 hover:bg-red-600",
 	hint: "bg-blue-500 hover:bg-blue-600",
+	action: "bg-slate-500 hover:bg-slate-600",
 };
 
 interface GameControlsProps {

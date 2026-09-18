@@ -28,6 +28,10 @@ function App() {
 		handleNewSudoku,
 		handleHint,
 		handleAnimateSame,
+		handleUndo,
+		handleRedo,
+		canUndo,
+		canRedo,
 	} = useSudokuGame();
 
 	return (
@@ -63,7 +67,18 @@ function App() {
 				onAnimateSame={handleAnimateSame}
 			/>
 
-			<div className="my-4 text-center">
+			<div className="my-4 flex gap-2 justify-center">
+				<button
+					data-testid="undo-button"
+					className={cn(BTN_BASE, BTN_VARIANTS.action)}
+					type="button"
+					onClick={handleUndo}
+					disabled={!canUndo || isComplete || isGenerating}
+					title="Undo (Ctrl+Z or ⌘Z)"
+					aria-label="Undo move"
+				>
+					Undo
+				</button>
 				<button
 					data-testid="hint-button"
 					className={cn(BTN_BASE, BTN_VARIANTS.hint)}
@@ -72,6 +87,17 @@ function App() {
 					disabled={isComplete || isGenerating}
 				>
 					Get Hint
+				</button>
+				<button
+					data-testid="redo-button"
+					className={cn(BTN_BASE, BTN_VARIANTS.action)}
+					type="button"
+					onClick={handleRedo}
+					disabled={!canRedo || isComplete || isGenerating}
+					title="Redo (Ctrl+Shift+Z or ⌘Shift+Z)"
+					aria-label="Redo move"
+				>
+					Redo
 				</button>
 			</div>
 

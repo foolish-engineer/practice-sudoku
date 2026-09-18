@@ -47,7 +47,7 @@
 > Expected functionality that serious Sudoku players need.
 
 - [x] **Timer** — count-up timer per puzzle; pauses on tab blur (`document.hidden` check); stops and turns green on completion
-- [ ] **Undo / Redo** — `Ctrl+Z` / `Ctrl+Shift+Z` keyboard shortcuts + UI buttons; does not affect pre-filled cells
+- [x] **Undo / Redo** — `Ctrl+Z` / `Ctrl+Shift+Z` keyboard shortcuts + UI buttons; does not affect pre-filled cells
 - [ ] **Pencil marks (notes mode)** — toggle between "value" and "notes" input mode; render small candidate numbers inside cells
 - [ ] **Check button** — validate the entire board at once; highlight all incorrect cells simultaneously
 - [ ] **Auto-save to `localStorage`** — persist board, timer, and difficulty so progress survives page refresh

@@ -263,4 +263,57 @@ test.describe("Sudoku App", () => {
 		await page.keyboard.press("Delete");
 		await expect(cell).toHaveValue("");
 	});
+
+	// -------------------------------------------------------------------------
+	// Undo / Redo
+	// -------------------------------------------------------------------------
+
+	test("undo and redo buttons and keyboard shortcuts work", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+		const cell = await getFirstEmptyCell(page);
+		if (!cell) throw new Error("No empty cell found on the board");
+
+		const undoBtn = page.getByTestId("undo-button");
+		const redoBtn = page.getByTestId("redo-button");
+
+		await expect(undoBtn).toBeDisabled();
+		await expect(redoBtn).toBeDisabled();
+
+		// Pressing Delete on an empty cell should NOT push to undo history
+		await cell.focus();
+		await page.keyboard.press("Backspace");
+		await expect(undoBtn).toBeDisabled();
+
+		// Make a move
+		await cell.fill("5");
+		await expect(cell).toHaveValue("5");
+		await expect(undoBtn).toBeEnabled();
+		await expect(redoBtn).toBeDisabled();
+
+		// Typing the same value should not add redundant history entries
+		await cell.fill("5");
+		await expect(cell).toHaveValue("5");
+
+		// Click Undo button - should return to empty in a single undo step
+		await undoBtn.click();
+		await expect(cell).toHaveValue("");
+		await expect(undoBtn).toBeDisabled();
+		await expect(redoBtn).toBeEnabled();
+
+		// Click Redo button
+		await redoBtn.click();
+		await expect(cell).toHaveValue("5");
+		await expect(undoBtn).toBeEnabled();
+		await expect(redoBtn).toBeDisabled();
+
+		// Keyboard shortcut Undo (Control+Z)
+		await page.keyboard.press("Control+z");
+		await expect(cell).toHaveValue("");
+
+		// Keyboard shortcut Redo (Control+Shift+Z)
+		await page.keyboard.press("Control+Shift+Z");
+		await expect(cell).toHaveValue("5");
+	});
 });

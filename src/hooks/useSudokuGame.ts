@@ -22,6 +22,8 @@ const LABEL_MAP: Record<Difficulty, LevelLabel> = {
 	hard: "Hard",
 };
 
+const MAX_HISTORY = 50;
+
 export function useSudokuGame() {
 	const [initialBoard, setInitialBoard] = useState<Board>(emptyBoard);
 	const [board, setBoard] = useState<Board>(emptyBoard);
@@ -32,6 +34,9 @@ export function useSudokuGame() {
 	const [animatingValue, setAnimatingValue] = useState<Cell | null>(null);
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [elapsed, setElapsed] = useState(0);
+
+	const [past, setPast] = useState<Board[]>([]);
+	const [future, setFuture] = useState<Board[]>([]);
 
 	const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -48,6 +53,8 @@ export function useSudokuGame() {
 		if (animTimerRef.current) clearTimeout(animTimerRef.current);
 		setAnimatingValue(null);
 		setElapsed(0);
+		setPast([]);
+		setFuture([]);
 
 		if (workerRef.current) {
 			const request: GeneratePuzzleRequest = {
@@ -64,6 +71,8 @@ export function useSudokuGame() {
 					setInitialBoard(puzzleBoard);
 					setBoard(puzzleBoard.map((row) => [...row]));
 					setSolvedBoard(solvedBoard);
+					setPast([]);
+					setFuture([]);
 				}
 			} catch {
 				setMessage("Failed to generate puzzle. Please try again.");
@@ -92,6 +101,8 @@ export function useSudokuGame() {
 						setInitialBoard(puzzleBoard);
 						setBoard(puzzleBoard.map((row) => [...row]));
 						setSolvedBoard(solvedBoard);
+						setPast([]);
+						setFuture([]);
 						setIsGenerating(false);
 					} else if (data.type === "PUZZLE_ERROR") {
 						setMessage("Failed to generate puzzle. Please try again.");
@@ -138,9 +149,13 @@ export function useSudokuGame() {
 			if (isGenerating) return;
 			if (val === "" || /^[1-9]$/.test(val)) {
 				const numVal: Cell = val === "" ? "" : Number(val);
+				if (board[row][col] === numVal) return;
+
 				const newBoard: Board = board.map((r, i) =>
 					r.map((c, j) => (i === row && j === col ? numVal : c)),
 				);
+				setPast((prev) => [...prev.slice(-(MAX_HISTORY - 1)), board]);
+				setFuture([]);
 				setBoard(newBoard);
 				if (numVal !== "" && !isValid(newBoard, row, col, numVal)) {
 					setMessage("Invalid move!");
@@ -170,6 +185,8 @@ export function useSudokuGame() {
 		const value = solvedBoard[row][col];
 		const newBoard: Board = board.map((r) => [...r]);
 		newBoard[row][col] = value;
+		setPast((prev) => [...prev.slice(-(MAX_HISTORY - 1)), board]);
+		setFuture([]);
 		setBoard(newBoard);
 		setHintCell({ row, col });
 
@@ -208,6 +225,57 @@ export function useSudokuGame() {
 		return () => clearInterval(interval);
 	}, [isTimerRunning]);
 
+	const handleUndo = useCallback(() => {
+		if (past.length === 0 || isGenerating || isComplete) return;
+		if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+		setHintCell(null);
+
+		const previous = past[past.length - 1];
+		setPast(past.slice(0, -1));
+		setFuture([board, ...future]);
+		setBoard(previous);
+		setMessage("");
+	}, [past, future, board, isGenerating, isComplete]);
+
+	const handleRedo = useCallback(() => {
+		if (future.length === 0 || isGenerating || isComplete) return;
+		if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+		setHintCell(null);
+
+		const next = future[0];
+		setFuture(future.slice(1));
+		setPast([...past, board]);
+		setBoard(next);
+		setMessage("");
+	}, [past, future, board, isGenerating, isComplete]);
+
+	const undoRef = useRef(handleUndo);
+	undoRef.current = handleUndo;
+	const redoRef = useRef(handleRedo);
+	redoRef.current = handleRedo;
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.metaKey || e.ctrlKey) {
+				const key = e.key.toLowerCase();
+				if (key === "z") {
+					e.preventDefault();
+					if (e.shiftKey) {
+						redoRef.current();
+					} else {
+						undoRef.current();
+					}
+				} else if (key === "y") {
+					e.preventDefault();
+					redoRef.current();
+				}
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, []);
+
 	return {
 		board,
 		initialBoard,
@@ -219,9 +287,13 @@ export function useSudokuGame() {
 		completedDigits,
 		isGenerating,
 		elapsed,
+		canUndo: past.length > 0,
+		canRedo: future.length > 0,
 		handleChange,
 		handleNewSudoku,
 		handleHint,
 		handleAnimateSame,
+		handleUndo,
+		handleRedo,
 	};
 }
