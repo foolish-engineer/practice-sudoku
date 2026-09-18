@@ -33,12 +33,14 @@ function App() {
 	return (
 		<div className="max-w-[600px] w-full p-8 bg-white rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] text-center mx-auto">
 			<h1>Sudoku</h1>
-			<div className="mb-2 text-center font-bold text-[1.1em]">
-				Level: <span data-testid="sudoku-level-label">{level}</span>
+			<div className="relative mb-2 flex items-center justify-center font-bold text-[1.1em]">
+				<div>
+					Level: <span data-testid="sudoku-level-label">{level}</span>
+				</div>
 				<span
 					data-testid="timer"
 					className={cn(
-						"ml-4 font-mono font-normal text-[0.95em] tabular-nums",
+						"absolute right-0 font-mono font-normal text-[0.95em] tabular-nums",
 						isComplete ? "text-green-600 font-semibold" : "text-gray-400",
 					)}
 				>
