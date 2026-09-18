@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { Cell } from "../types/sudoku";
-import { cn } from "../utils/cn";
+import { cn } from "../utils";
 
 const CELL_BADGE_CLASS =
 	"absolute top-[3px] right-[3px] w-[14px] h-[14px] p-0 m-0 border border-blue-500/25 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center cursor-pointer z-[4] transition-all duration-200 hover:bg-blue-500 hover:text-white hover:border-blue-600 hover:scale-125";

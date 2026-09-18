@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { Difficulty } from "../types/sudoku";
-import { cn } from "../utils/cn";
+import { cn } from "../utils";
 
 // Shared disabled state — every button variant uses the same disabled appearance
 const BTN_DISABLED =

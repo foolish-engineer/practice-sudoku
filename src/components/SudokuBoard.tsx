@@ -44,32 +44,38 @@ export function SudokuBoard({
 			const row = Number(parts[1]);
 			const col = Number(parts[2]);
 
-			let nextRow = row;
-			let nextCol = col;
+			let dRow = 0;
+			let dCol = 0;
 
 			switch (e.key) {
 				case "ArrowUp":
-					nextRow = (row + 8) % 9;
+					dRow = -1;
 					break;
 				case "ArrowDown":
-					nextRow = (row + 1) % 9;
+					dRow = 1;
 					break;
 				case "ArrowLeft":
-					nextCol = (col + 8) % 9;
+					dCol = -1;
 					break;
 				case "ArrowRight":
-					nextCol = (col + 1) % 9;
+					dCol = 1;
 					break;
 				default:
 					return;
 			}
 
 			e.preventDefault();
-			document
-				.querySelector<HTMLElement>(
-					`[data-testid="cell-${nextRow}-${nextCol}"]`,
-				)
-				?.focus();
+			for (let step = 1; step < 9; step++) {
+				const targetRow = (row + dRow * step + 9) % 9;
+				const targetCol = (col + dCol * step + 9) % 9;
+				const el = document.querySelector<HTMLInputElement>(
+					`[data-testid="cell-${targetRow}-${targetCol}"]`,
+				);
+				if (el && !el.disabled) {
+					el.focus();
+					break;
+				}
+			}
 		},
 		[],
 	);

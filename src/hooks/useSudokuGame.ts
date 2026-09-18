@@ -31,6 +31,7 @@ export function useSudokuGame() {
 	const [solvedBoard, setSolvedBoard] = useState<SolvedBoard | null>(null);
 	const [animatingValue, setAnimatingValue] = useState<Cell | null>(null);
 	const [isGenerating, setIsGenerating] = useState(false);
+	const [elapsed, setElapsed] = useState(0);
 
 	const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,6 +47,7 @@ export function useSudokuGame() {
 
 		if (animTimerRef.current) clearTimeout(animTimerRef.current);
 		setAnimatingValue(null);
+		setElapsed(0);
 
 		if (workerRef.current) {
 			const request: GeneratePuzzleRequest = {
@@ -193,6 +195,19 @@ export function useSudokuGame() {
 		);
 	}, [board]);
 
+	// Count-up timer: runs while a puzzle is active, pauses when the tab is hidden.
+	// Checking document.hidden inside the tick (rather than adding a separate
+	// visibilitychange listener) keeps the logic in one place and avoids the
+	// complexity of cancelling/restarting intervals on visibility events.
+	const isTimerRunning = !isGenerating && !isComplete;
+	useEffect(() => {
+		if (!isTimerRunning) return;
+		const interval = setInterval(() => {
+			if (!document.hidden) setElapsed((s) => s + 1);
+		}, 1000);
+		return () => clearInterval(interval);
+	}, [isTimerRunning]);
+
 	return {
 		board,
 		initialBoard,
@@ -203,6 +218,7 @@ export function useSudokuGame() {
 		isComplete,
 		completedDigits,
 		isGenerating,
+		elapsed,
 		handleChange,
 		handleNewSudoku,
 		handleHint,

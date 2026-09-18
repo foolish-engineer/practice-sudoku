@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { cn } from "../utils/cn";
+import { cn } from "../utils";
 import { BTN_BASE, BTN_VARIANTS } from "./GameControls";
 
 interface ErrorBoundaryProps {

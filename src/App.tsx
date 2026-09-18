@@ -6,7 +6,7 @@ import {
 } from "./components/GameControls";
 import { SudokuBoard } from "./components/SudokuBoard";
 import { useSudokuGame } from "./hooks/useSudokuGame";
-import { cn } from "./utils/cn";
+import { cn, formatTime } from "./utils";
 
 // Re-export core algorithms and types for backwards compatibility
 export * from "./core/sudoku";
@@ -23,6 +23,7 @@ function App() {
 		isComplete,
 		completedDigits,
 		isGenerating,
+		elapsed,
 		handleChange,
 		handleNewSudoku,
 		handleHint,
@@ -34,6 +35,15 @@ function App() {
 			<h1>Sudoku</h1>
 			<div className="mb-2 text-center font-bold text-[1.1em]">
 				Level: <span data-testid="sudoku-level-label">{level}</span>
+				<span
+					data-testid="timer"
+					className={cn(
+						"ml-4 font-mono font-normal text-[0.95em] tabular-nums",
+						isComplete ? "text-green-600 font-semibold" : "text-gray-400",
+					)}
+				>
+					{formatTime(elapsed)}
+				</span>
 			</div>
 
 			<GameControls

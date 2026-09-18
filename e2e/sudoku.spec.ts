@@ -196,5 +196,71 @@ test.describe("Sudoku App", () => {
 		await expect(page.getByTestId("status-message")).toHaveText(
 			"Congratulations! Puzzle complete.",
 		);
+		await expect(page.getByTestId("timer")).toHaveClass(/text-green-600/);
+	});
+
+	// -------------------------------------------------------------------------
+	// Timer
+	// -------------------------------------------------------------------------
+
+	test("timer renders initially, increments, and resets on new puzzle", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+
+		const timer = page.getByTestId("timer");
+		await expect(timer).toBeVisible();
+
+		// Wait for timer to advance past 0:00
+		await expect(timer).not.toHaveText("0:00", { timeout: 4_000 });
+		await expect(timer).toHaveText(/^[0-9]+:[0-9]{2}$/);
+
+		// Trigger New Easy game and verify timer resets to 0:00
+		await page.getByRole("button", { name: "New Easy" }).click();
+		await expect(timer).toHaveText("0:00");
+	});
+
+	// -------------------------------------------------------------------------
+	// Keyboard navigation & accessibility
+	// -------------------------------------------------------------------------
+
+	test("navigates editable cells using arrow keys", async ({ page }) => {
+		await waitForBoard(page);
+
+		const firstCell = await getFirstEmptyCell(page);
+		if (!firstCell) throw new Error("No empty cell found on the board");
+
+		await firstCell.focus();
+		await expect(firstCell).toBeFocused();
+
+		// Pressing ArrowRight should shift focus to another cell
+		await page.keyboard.press("ArrowRight");
+		const newFocused = page.locator("input:focus");
+		await expect(newFocused).toBeVisible();
+		expect(await newFocused.getAttribute("data-testid")).not.toBe(
+			await firstCell.getAttribute("data-testid"),
+		);
+	});
+
+	test("clearing cell value using Backspace and Delete keys", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+		const cell = await getFirstEmptyCell(page);
+		if (!cell) throw new Error("No empty cell found on the board");
+
+		await cell.fill("9");
+		await expect(cell).toHaveValue("9");
+
+		await cell.focus();
+		await page.keyboard.press("Backspace");
+		await expect(cell).toHaveValue("");
+
+		await cell.fill("7");
+		await expect(cell).toHaveValue("7");
+
+		await cell.focus();
+		await page.keyboard.press("Delete");
+		await expect(cell).toHaveValue("");
 	});
 });
