@@ -44,7 +44,7 @@ jobs:
         run: npm run build
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-report
@@ -54,7 +54,7 @@ jobs:
       # Upload the built dist/ as a Pages artifact for the deploy job.
       # Only runs on main-branch pushes — PRs never deploy so don't waste the upload.
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           path: dist/
@@ -87,7 +87,7 @@ jobs:
         run: npm run test:e2e
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
