@@ -24,7 +24,9 @@ function App() {
 		completedDigits,
 		isGenerating,
 		elapsed,
+		notes,
 		handleChange,
+		handleNotesChange,
 		handleNewSudoku,
 		handleHint,
 		handleAnimateSame,
@@ -60,10 +62,12 @@ function App() {
 			<SudokuBoard
 				board={board}
 				initialBoard={initialBoard}
+				notes={notes}
 				hintCell={hintCell}
 				animatingValue={animatingValue}
 				isGenerating={isGenerating}
 				onChange={handleChange}
+				onNotesChange={handleNotesChange}
 				onAnimateSame={handleAnimateSame}
 			/>
 

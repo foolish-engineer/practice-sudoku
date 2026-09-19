@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { Cell } from "../types/sudoku";
+import type { Cell, CellNotes } from "../types/sudoku";
 import { cn } from "../utils";
 
 const CELL_BADGE_CLASS =
@@ -9,11 +9,13 @@ interface SudokuCellProps {
 	row: number;
 	col: number;
 	value: Cell;
+	notes: CellNotes;
 	isInitial: boolean;
 	isHint: boolean;
 	isInvalid: boolean;
 	isAnimating: boolean;
 	onChange: (row: number, col: number, val: string) => void;
+	onNotesChange: (row: number, col: number, val: string) => void;
 	onAnimateSame: (val: Cell) => void;
 }
 
@@ -21,11 +23,13 @@ export const SudokuCell = memo(function SudokuCell({
 	row,
 	col,
 	value,
+	notes,
 	isInitial,
 	isHint,
 	isInvalid,
 	isAnimating,
 	onChange,
+	onNotesChange,
 	onAnimateSame,
 }: SudokuCellProps) {
 	const cellClass = cn(
@@ -41,7 +45,13 @@ export const SudokuCell = memo(function SudokuCell({
 		isAnimating && "animate-pulse-highlight z-[5] relative",
 	);
 
-	const ariaLabel = `Row ${row + 1}, Column ${col + 1}${value !== "" ? `, value ${value}` : ", empty"}`;
+	const ariaLabel = `Row ${row + 1}, Column ${col + 1}${
+		value !== ""
+			? `, value ${value}`
+			: notes.length > 0
+				? `, empty, notes ${notes}`
+				: ", empty"
+	}`;
 
 	return (
 		<td className="relative p-0">
@@ -62,6 +72,21 @@ export const SudokuCell = memo(function SudokuCell({
 				}}
 				disabled={isInitial}
 			/>
+			{!isInitial && (
+				<input
+					data-testid={`notes-input-${row}-${col}`}
+					type="text"
+					inputMode="numeric"
+					maxLength={9}
+					value={notes}
+					onChange={(e) => onNotesChange(row, col, e.target.value)}
+					onClick={(e) => e.stopPropagation()}
+					onKeyDown={(e) => e.stopPropagation()}
+					className="absolute top-[2px] left-[2px] w-[34px] h-[15px] text-[9px] tracking-tight leading-none text-slate-600 bg-transparent border border-slate-300/60 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-0.5 outline-none z-[3] font-medium"
+					title="Candidate notes"
+					aria-label={`Row ${row + 1}, Column ${col + 1} notes`}
+				/>
+			)}
 			{value !== "" && (
 				<button
 					type="button"

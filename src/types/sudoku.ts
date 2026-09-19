@@ -21,3 +21,9 @@ export interface PuzzleResult {
 	puzzleBoard: Board;
 	solvedBoard: SolvedBoard;
 }
+
+/** A string of pencil mark candidate numbers for a single cell (e.g. "124"). */
+export type CellNotes = string;
+
+/** A 9×9 grid of pencil mark candidate notes. */
+export type BoardNotes = CellNotes[][];

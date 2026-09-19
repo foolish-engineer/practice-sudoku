@@ -1,25 +1,29 @@
 import { useCallback, useEffect } from "react";
 import { isValid } from "../core/sudoku";
-import type { Board, Cell, HintCell } from "../types/sudoku";
+import type { Board, BoardNotes, Cell, HintCell } from "../types/sudoku";
 import { SudokuCell } from "./SudokuCell";
 
 interface SudokuBoardProps {
 	board: Board;
 	initialBoard: Board;
+	notes: BoardNotes;
 	hintCell: HintCell;
 	animatingValue: Cell | null;
 	isGenerating?: boolean;
 	onChange: (row: number, col: number, val: string) => void;
+	onNotesChange: (row: number, col: number, val: string) => void;
 	onAnimateSame: (val: Cell) => void;
 }
 
 export function SudokuBoard({
 	board,
 	initialBoard,
+	notes,
 	hintCell,
 	animatingValue,
 	isGenerating = false,
 	onChange,
+	onNotesChange,
 	onAnimateSame,
 }: SudokuBoardProps) {
 	// Move focus to the hint cell whenever a hint is applied
@@ -122,11 +126,13 @@ export function SudokuBoard({
 										row={i}
 										col={j}
 										value={cell}
+										notes={notes[i][j]}
 										isInitial={isInitial}
 										isHint={isHint}
 										isInvalid={isInvalid}
 										isAnimating={isAnimating}
 										onChange={onChange}
+										onNotesChange={onNotesChange}
 										onAnimateSame={onAnimateSame}
 									/>
 								);

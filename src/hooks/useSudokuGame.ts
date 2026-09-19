@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { generatePuzzle, isValid } from "../core/sudoku";
 import type {
 	Board,
+	BoardNotes,
 	Cell,
 	Difficulty,
 	HintCell,
@@ -16,6 +17,37 @@ import type {
 const emptyBoard = (): Board =>
 	Array.from({ length: 9 }, () => Array(9).fill(""));
 
+const emptyNotes = (): BoardNotes =>
+	Array.from({ length: 9 }, () => Array(9).fill(""));
+
+function clearPeerNotes(
+	notes: BoardNotes,
+	row: number,
+	col: number,
+	numVal: number,
+): BoardNotes {
+	const boxRow = Math.floor(row / 3) * 3;
+	const boxCol = Math.floor(col / 3) * 3;
+	const digitStr = String(numVal);
+	return notes.map((r, i) =>
+		r.map((c, j) => {
+			const sameRow = i === row;
+			const sameCol = j === col;
+			const sameBox =
+				i >= boxRow && i < boxRow + 3 && j >= boxCol && j < boxCol + 3;
+			if ((sameRow || sameCol || sameBox) && !(i === row && j === col)) {
+				return c.split(digitStr).join("");
+			}
+			return c;
+		}),
+	);
+}
+
+interface HistoryState {
+	board: Board;
+	notes: BoardNotes;
+}
+
 const LABEL_MAP: Record<Difficulty, LevelLabel> = {
 	easy: "Easy",
 	medium: "Medium",
@@ -27,6 +59,7 @@ const MAX_HISTORY = 50;
 export function useSudokuGame() {
 	const [initialBoard, setInitialBoard] = useState<Board>(emptyBoard);
 	const [board, setBoard] = useState<Board>(emptyBoard);
+	const [notes, setNotes] = useState<BoardNotes>(emptyNotes);
 	const [message, setMessage] = useState("");
 	const [hintCell, setHintCell] = useState<HintCell>(null);
 	const [level, setLevel] = useState<LevelLabel>("Easy");
@@ -35,8 +68,8 @@ export function useSudokuGame() {
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [elapsed, setElapsed] = useState(0);
 
-	const [past, setPast] = useState<Board[]>([]);
-	const [future, setFuture] = useState<Board[]>([]);
+	const [past, setPast] = useState<HistoryState[]>([]);
+	const [future, setFuture] = useState<HistoryState[]>([]);
 
 	const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,6 +88,7 @@ export function useSudokuGame() {
 		setElapsed(0);
 		setPast([]);
 		setFuture([]);
+		setNotes(emptyNotes());
 
 		if (workerRef.current) {
 			const request: GeneratePuzzleRequest = {
@@ -71,6 +105,7 @@ export function useSudokuGame() {
 					setInitialBoard(puzzleBoard);
 					setBoard(puzzleBoard.map((row) => [...row]));
 					setSolvedBoard(solvedBoard);
+					setNotes(emptyNotes());
 					setPast([]);
 					setFuture([]);
 				}
@@ -101,6 +136,7 @@ export function useSudokuGame() {
 						setInitialBoard(puzzleBoard);
 						setBoard(puzzleBoard.map((row) => [...row]));
 						setSolvedBoard(solvedBoard);
+						setNotes(emptyNotes());
 						setPast([]);
 						setFuture([]);
 						setIsGenerating(false);
@@ -144,20 +180,67 @@ export function useSudokuGame() {
 		}, 3000);
 	}, []);
 
+	const handleNotesChange = useCallback(
+		(row: number, col: number, val: string) => {
+			if (isGenerating) return;
+
+			const sanitized = Array.from(new Set(val.replace(/[^1-9]/g, "")))
+				.sort()
+				.join("");
+
+			if (notes[row][col] === sanitized) return;
+
+			const nextNotes: BoardNotes = notes.map((r, i) =>
+				r.map((c, j) => (i === row && j === col ? sanitized : c)),
+			);
+
+			setPast((prev) => [...prev.slice(-(MAX_HISTORY - 1)), { board, notes }]);
+			setFuture([]);
+			setNotes(nextNotes);
+		},
+		[board, isGenerating, notes],
+	);
+
 	const handleChange = useCallback(
 		(row: number, col: number, val: string) => {
 			if (isGenerating) return;
+
 			if (val === "" || /^[1-9]$/.test(val)) {
 				const numVal: Cell = val === "" ? "" : Number(val);
+
+				if (numVal === "") {
+					if (board[row][col] === "") return;
+
+					const newBoard: Board = board.map((r, i) =>
+						r.map((c, j) => (i === row && j === col ? "" : c)),
+					);
+
+					setPast((prev) => [
+						...prev.slice(-(MAX_HISTORY - 1)),
+						{ board, notes },
+					]);
+					setFuture([]);
+					setBoard(newBoard);
+					setMessage("");
+					return;
+				}
+
 				if (board[row][col] === numVal) return;
 
 				const newBoard: Board = board.map((r, i) =>
 					r.map((c, j) => (i === row && j === col ? numVal : c)),
 				);
-				setPast((prev) => [...prev.slice(-(MAX_HISTORY - 1)), board]);
+
+				const newNotes = clearPeerNotes(notes, row, col, numVal);
+
+				setPast((prev) => [
+					...prev.slice(-(MAX_HISTORY - 1)),
+					{ board, notes },
+				]);
 				setFuture([]);
 				setBoard(newBoard);
-				if (numVal !== "" && !isValid(newBoard, row, col, numVal)) {
+				setNotes(newNotes);
+				if (!isValid(newBoard, row, col, numVal)) {
 					setMessage("Invalid move!");
 				} else {
 					setMessage("");
@@ -166,7 +249,7 @@ export function useSudokuGame() {
 				setMessage("Invalid move!");
 			}
 		},
-		[board, isGenerating],
+		[board, isGenerating, notes],
 	);
 
 	const handleHint = useCallback(() => {
@@ -185,14 +268,18 @@ export function useSudokuGame() {
 		const value = solvedBoard[row][col];
 		const newBoard: Board = board.map((r) => [...r]);
 		newBoard[row][col] = value;
-		setPast((prev) => [...prev.slice(-(MAX_HISTORY - 1)), board]);
+
+		const newNotes = clearPeerNotes(notes, row, col, value);
+
+		setPast((prev) => [...prev.slice(-(MAX_HISTORY - 1)), { board, notes }]);
 		setFuture([]);
 		setBoard(newBoard);
+		setNotes(newNotes);
 		setHintCell({ row, col });
 
 		if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
 		hintTimerRef.current = setTimeout(() => setHintCell(null), 6000);
-	}, [board, initialBoard, isGenerating, solvedBoard]);
+	}, [board, initialBoard, isGenerating, notes, solvedBoard]);
 
 	const isComplete = useMemo(
 		() =>
@@ -232,10 +319,11 @@ export function useSudokuGame() {
 
 		const previous = past[past.length - 1];
 		setPast(past.slice(0, -1));
-		setFuture([board, ...future]);
-		setBoard(previous);
+		setFuture([{ board, notes }, ...future]);
+		setBoard(previous.board);
+		setNotes(previous.notes);
 		setMessage("");
-	}, [past, future, board, isGenerating, isComplete]);
+	}, [past, future, board, notes, isGenerating, isComplete]);
 
 	const handleRedo = useCallback(() => {
 		if (future.length === 0 || isGenerating || isComplete) return;
@@ -244,16 +332,16 @@ export function useSudokuGame() {
 
 		const next = future[0];
 		setFuture(future.slice(1));
-		setPast([...past, board]);
-		setBoard(next);
+		setPast([...past, { board, notes }]);
+		setBoard(next.board);
+		setNotes(next.notes);
 		setMessage("");
-	}, [past, future, board, isGenerating, isComplete]);
+	}, [past, future, board, notes, isGenerating, isComplete]);
 
 	const undoRef = useRef(handleUndo);
 	undoRef.current = handleUndo;
 	const redoRef = useRef(handleRedo);
 	redoRef.current = handleRedo;
-
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.metaKey || e.ctrlKey) {
@@ -287,9 +375,11 @@ export function useSudokuGame() {
 		completedDigits,
 		isGenerating,
 		elapsed,
+		notes,
 		canUndo: past.length > 0,
 		canRedo: future.length > 0,
 		handleChange,
+		handleNotesChange,
 		handleNewSudoku,
 		handleHint,
 		handleAnimateSame,

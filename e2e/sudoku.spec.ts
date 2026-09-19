@@ -316,4 +316,63 @@ test.describe("Sudoku App", () => {
 		await page.keyboard.press("Control+Shift+Z");
 		await expect(cell).toHaveValue("5");
 	});
+
+	// -------------------------------------------------------------------------
+	// Pencil marks (Notes input in top-left corner)
+	// -------------------------------------------------------------------------
+
+	test("pencil marks text box in top-left corner of empty cells, typing notes, auto-clearing, and undo/redo", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+		const cell = await getFirstEmptyCell(page);
+		if (!cell) throw new Error("No empty cell found on the board");
+
+		const testId = await cell.getAttribute("data-testid");
+		if (!testId) throw new Error("Missing data-testid on cell");
+		const [, row, col] = testId.split("-");
+		const notesInput = page.getByTestId(`notes-input-${row}-${col}`);
+		const undoBtn = page.getByTestId("undo-button");
+		const redoBtn = page.getByTestId("redo-button");
+
+		// Notes input is enabled and visible in the empty cell
+		await expect(notesInput).toBeVisible();
+		await expect(notesInput).toBeEnabled();
+		await expect(notesInput).toHaveValue("");
+
+		// Type candidate digits into the notes input
+		await notesInput.fill("37");
+		await expect(notesInput).toHaveValue("37");
+		await expect(undoBtn).toBeEnabled();
+
+		// Undo candidate notes entry
+		await undoBtn.click();
+		await expect(notesInput).toHaveValue("");
+
+		// Redo candidate notes entry
+		await redoBtn.click();
+		await expect(notesInput).toHaveValue("37");
+
+		// Enter a real value "5" in the main cell
+		await cell.fill("5");
+		await expect(cell).toHaveValue("5");
+
+		// The notes input remains visible and enabled even when the cell has a value
+		await expect(notesInput).toBeVisible();
+		await expect(notesInput).toHaveValue("37");
+
+		// Notes can still be edited when the cell has a value
+		await notesInput.fill("379");
+		await expect(notesInput).toHaveValue("379");
+
+		// Undo entering "379" into notes
+		await undoBtn.click();
+		await expect(notesInput).toHaveValue("37");
+
+		// Undo entering "5" into main cell
+		await undoBtn.click();
+		await expect(cell).toHaveValue("");
+		await expect(notesInput).toBeVisible();
+		await expect(notesInput).toHaveValue("37");
+	});
 });
