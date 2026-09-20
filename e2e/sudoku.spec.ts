@@ -386,7 +386,9 @@ test.describe("Sudoku App", () => {
 
 		// The hint cell gets a special background class temporarily, but we can just find
 		// the cell that was focused.
-		const cell = page.locator("input:focus");
+		const focusedCell = page.locator("input:focus");
+		const testId = (await focusedCell.getAttribute("data-testid")) ?? "";
+		const cell = page.getByTestId(testId);
 		const correctVal = await cell.inputValue();
 
 		// Pick an incorrect value
