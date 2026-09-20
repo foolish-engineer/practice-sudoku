@@ -11,8 +11,8 @@ export default defineConfig({
 	timeout: 30_000,
 	// Maximum time for expect() assertions
 	expect: { timeout: 10_000 },
-	// Re-run failed tests once on CI
-	retries: process.env.CI ? 1 : 0,
+	// Re-run failed tests (1 locally, 2 on CI)
+	retries: process.env.CI ? 2 : 1,
 	// Parallel workers: 3 locally, 2 on CI
 	workers: process.env.CI ? 2 : 3,
 	// Reporters

@@ -56,21 +56,55 @@ const LABEL_MAP: Record<Difficulty, LevelLabel> = {
 
 const MAX_HISTORY = 50;
 
+interface GameSaveState {
+	initialBoard: Board;
+	board: Board;
+	notes: BoardNotes;
+	level: LevelLabel;
+	solvedBoard: SolvedBoard;
+	elapsed: number;
+	past: HistoryState[];
+	future: HistoryState[];
+}
+
 export function useSudokuGame() {
-	const [initialBoard, setInitialBoard] = useState<Board>(emptyBoard);
-	const [board, setBoard] = useState<Board>(emptyBoard);
-	const [notes, setNotes] = useState<BoardNotes>(emptyNotes);
+	const initialState = useMemo(() => {
+		try {
+			const saved = localStorage.getItem("practice-sudoku-save");
+			if (saved) return JSON.parse(saved) as GameSaveState;
+		} catch (e) {
+			console.error("Failed to load saved game", e);
+		}
+		return null;
+	}, []);
+	const [initialBoard, setInitialBoard] = useState<Board>(
+		() => initialState?.initialBoard ?? emptyBoard(),
+	);
+	const [board, setBoard] = useState<Board>(
+		() => initialState?.board ?? emptyBoard(),
+	);
+	const [notes, setNotes] = useState<BoardNotes>(
+		() => initialState?.notes ?? emptyNotes(),
+	);
 	const [message, setMessage] = useState("");
 	const [hintCell, setHintCell] = useState<HintCell>(null);
-	const [level, setLevel] = useState<LevelLabel>("Easy");
-	const [solvedBoard, setSolvedBoard] = useState<SolvedBoard | null>(null);
+	const [level, setLevel] = useState<LevelLabel>(
+		() => initialState?.level ?? "Easy",
+	);
+	const [solvedBoard, setSolvedBoard] = useState<SolvedBoard | null>(
+		() => initialState?.solvedBoard ?? null,
+	);
 	const [animatingValue, setAnimatingValue] = useState<Cell | null>(null);
 	const [checkingCells, setCheckingCells] = useState<[number, number][]>([]);
 	const [isGenerating, setIsGenerating] = useState(false);
-	const [elapsed, setElapsed] = useState(0);
+	const [elapsed, setElapsed] = useState(() => initialState?.elapsed ?? 0);
 
-	const [past, setPast] = useState<HistoryState[]>([]);
-	const [future, setFuture] = useState<HistoryState[]>([]);
+	const [past, setPast] = useState<HistoryState[]>(
+		() => initialState?.past ?? [],
+	);
+	const [future, setFuture] = useState<HistoryState[]>(
+		() => initialState?.future ?? [],
+	);
 
 	const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -163,7 +197,9 @@ export function useSudokuGame() {
 			}
 		}
 
-		handleNewSudoku("easy");
+		if (!initialState) {
+			handleNewSudoku("easy");
+		}
 
 		return () => {
 			if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
@@ -173,7 +209,7 @@ export function useSudokuGame() {
 				workerRef.current = null;
 			}
 		};
-	}, [handleNewSudoku]);
+	}, [handleNewSudoku, initialState]);
 
 	const handleAnimateSame = useCallback((val: Cell) => {
 		if (!val) return;
@@ -306,6 +342,35 @@ export function useSudokuGame() {
 		if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
 		hintTimerRef.current = setTimeout(() => setHintCell(null), 6000);
 	}, [board, initialBoard, isGenerating, notes, solvedBoard]);
+
+	useEffect(() => {
+		if (isGenerating || !solvedBoard) return;
+		const state: GameSaveState = {
+			initialBoard,
+			board,
+			notes,
+			level,
+			solvedBoard,
+			elapsed,
+			past,
+			future,
+		};
+		try {
+			localStorage.setItem("practice-sudoku-save", JSON.stringify(state));
+		} catch (e) {
+			console.error("Failed to save game", e);
+		}
+	}, [
+		initialBoard,
+		board,
+		notes,
+		level,
+		solvedBoard,
+		elapsed,
+		past,
+		future,
+		isGenerating,
+	]);
 
 	const isComplete = useMemo(
 		() =>

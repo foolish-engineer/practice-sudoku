@@ -403,4 +403,31 @@ test.describe("Sudoku App", () => {
 		// It should be marked invalid
 		await expect(cell).toHaveAttribute("aria-invalid", "true");
 	});
+	test("progress is saved to and restored from localStorage", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+		const cells = page.locator('[data-testid^="cell-"]');
+		const count = await cells.count();
+		let emptyCellId = "";
+		for (let i = 0; i < count; i++) {
+			const cell = cells.nth(i);
+			if (!(await cell.isDisabled()) && (await cell.inputValue()) === "") {
+				emptyCellId = (await cell.getAttribute("data-testid")) ?? "";
+				await cell.fill("5");
+				break;
+			}
+		}
+
+		// Wait a moment for React to commit state and run the save useEffect
+		await page.waitForTimeout(200);
+
+		// Reload the page
+		await page.reload();
+		await waitForBoard(page);
+
+		// Verify the value was restored
+		const restoredCell = page.getByTestId(emptyCellId);
+		await expect(restoredCell).toHaveValue("5");
+	});
 });
