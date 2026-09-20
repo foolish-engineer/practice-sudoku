@@ -31,9 +31,11 @@ export default defineConfig({
 
 	projects: [
 		{
-			// Use installed system Chrome — no playwright browser download required
 			name: "chromium",
-			use: { ...devices["Desktop Chrome"], channel: "chrome" },
+			use: {
+				...devices["Desktop Chrome"],
+				channel: process.env.CI ? undefined : "chrome",
+			},
 		},
 	],
 
