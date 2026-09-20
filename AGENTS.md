@@ -2,6 +2,8 @@
 
 Welcome to the **Practice Sudoku** repository. Read this file carefully before making any changes.
 
+> **CRITICAL AGENT RULE**: You MUST always check lint (`npm run lint`), format (`npm run format`), unit tests (`npm run test`), and E2E tests (`npm run test:e2e`) after making any code changes to verify they pass completely. Do not assume your code works without running these verifications.
+
 ---
 
 ## Technology Stack
@@ -102,7 +104,11 @@ Puzzle generation runs in a dedicated Web Worker to keep the main thread unblock
 | `initialBoard` | `number[][]` | The puzzle as generated — used to determine which cells are locked (pre-filled). |
 | `board` | `number\|string[][]` | Current live board state with user edits. Empty cells are `""`. |
 | `solvedBoard` | `number[][]` | The complete solution — used for hint logic and win detection. |
+| `notes` | `string[][]` | Candidate pencil marks typed into empty cells by the user. |
+| `elapsed` | `number` | Seconds elapsed since the current puzzle started. |
+| `past`/`future` | `HistoryState[]` | Stacks tracking board and notes state for Undo/Redo operations. |
 | `hintCell` | `{row, col} \| null` | Coordinates of the cell currently highlighted as a hint. Cleared after 6 seconds via `hintTimerRef`. |
+| `checkingCells` | `[number, number][]` | Coordinates of user-filled cells that don't match the solution. Highlighted for 3 seconds. |
 | `level` | `string` | Display label: `"Easy"`, `"Medium"`, or `"Hard"`. |
 | `animatingValue` | `number \| null` | When set, all cells matching this value get the pulse animation. Cleared after 3 seconds via `animTimerRef`. |
 | `message` | `string` | Status message shown below the board (e.g., `"Invalid move!"`). |
@@ -110,10 +116,13 @@ Puzzle generation runs in a dedicated Web Worker to keep the main thread unblock
 
 ### Key Handlers
 
-- **`handleChange(row, col, val)`** — Updates `board` state, runs `isValid` to set `message`. Only accepts `""` or `[1-9]`. Guards against interaction during generation.
+- **`handleChange(row, col, val)`** — Updates `board` state, handles note clearing, pushes to undo history, and runs `isValid` to set `message`.
+- **`handleNotesChange(row, col, notes)`** — Updates candidate `notes` for a specific cell and pushes to undo history.
 - **`handleNewSudoku(difficulty)`** — Posts a `GENERATE_PUZZLE` message to the worker, sets `isGenerating: true`, resets all state.
 - **`handleHint()`** — Finds all cells that differ from `solvedBoard`, picks a random one, fills it in, and sets `hintCell` for 6 seconds.
+- **`handleCheck()`** — Compares the user's `board` against `solvedBoard` and temporarily populates `checkingCells` to highlight incorrect entries.
 - **`handleAnimateSame(val)`** — Sets `animatingValue` to animate all matching cells for 3 seconds.
+- **`handleUndo()` / `handleRedo()`** — Traverses the `past` and `future` stacks to revert or reapply board and note states.
 
 ---
 
