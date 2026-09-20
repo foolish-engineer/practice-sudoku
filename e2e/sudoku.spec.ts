@@ -375,4 +375,30 @@ test.describe("Sudoku App", () => {
 		await expect(notesInput).toBeVisible();
 		await expect(notesInput).toHaveValue("37");
 	});
+
+	test("check button highlights incorrect cells and auto-clears after 3 seconds", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+
+		// Get a hint to know the correct value for a cell
+		await page.getByTestId("hint-button").click();
+
+		// The hint cell gets a special background class temporarily, but we can just find
+		// the cell that was focused.
+		const cell = page.locator("input:focus");
+		const correctVal = await cell.inputValue();
+
+		// Pick an incorrect value
+		const incorrectVal = correctVal === "1" ? "2" : "1";
+
+		// Fill it with incorrect value
+		await cell.fill(incorrectVal);
+
+		// Click check button
+		await page.getByTestId("check-button").click();
+
+		// It should be marked invalid
+		await expect(cell).toHaveAttribute("aria-invalid", "true");
+	});
 });

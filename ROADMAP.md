@@ -49,7 +49,7 @@
 - [x] **Timer** — count-up timer per puzzle; pauses on tab blur (`document.hidden` check); stops and turns green on completion
 - [x] **Undo / Redo** — `Ctrl+Z` / `Ctrl+Shift+Z` keyboard shortcuts + UI buttons; does not affect pre-filled cells
 - [x] **Pencil marks (notes)** — small text box in top-left corner of empty cells for candidate numbers; auto-removes candidates on entry and integrates with Undo/Redo
-- [ ] **Check button** — validate the entire board at once; highlight all incorrect cells simultaneously
+- [x] **Check button** — validate the entire board at once; highlight all incorrect cells simultaneously
 - [ ] **Auto-save to `localStorage`** — persist board, timer, and difficulty so progress survives page refresh
 
 ---
@@ -81,10 +81,10 @@
 
 | Phase | Items | Done |
 |---|---|---|
-| Phase 1 — Foundation | 6 | 5 |
+| Phase 1 — Foundation | 6 | 6 |
 | Phase 2 — Quality & Reliability | 4 | 4 |
 | Phase 3 — Accessibility | 6 | 6 |
-| Phase 4 — Core Features | 5 | 3 |
+| Phase 4 — Core Features | 5 | 4 |
 | Phase 5 — UX & Polish | 5 | 0 |
 | Phase 6 — Distribution | 4 | 0 |
-| **Total** | **30** | **18** |
+| **Total** | **30** | **20** |

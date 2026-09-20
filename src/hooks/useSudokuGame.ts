@@ -65,6 +65,7 @@ export function useSudokuGame() {
 	const [level, setLevel] = useState<LevelLabel>("Easy");
 	const [solvedBoard, setSolvedBoard] = useState<SolvedBoard | null>(null);
 	const [animatingValue, setAnimatingValue] = useState<Cell | null>(null);
+	const [checkingCells, setCheckingCells] = useState<[number, number][]>([]);
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [elapsed, setElapsed] = useState(0);
 
@@ -73,6 +74,7 @@ export function useSudokuGame() {
 
 	const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const checkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const workerRef = useRef<Worker | null>(null);
 	const requestIdRef = useRef<number>(0);
 
@@ -81,6 +83,8 @@ export function useSudokuGame() {
 		setIsGenerating(true);
 		setMessage("");
 		setHintCell(null);
+		setCheckingCells([]);
+		if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
 		setLevel(LABEL_MAP[difficulty]);
 
 		if (animTimerRef.current) clearTimeout(animTimerRef.current);
@@ -205,6 +209,9 @@ export function useSudokuGame() {
 		(row: number, col: number, val: string) => {
 			if (isGenerating) return;
 
+			setCheckingCells([]);
+			if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+
 			if (val === "" || /^[1-9]$/.test(val)) {
 				const numVal: Cell = val === "" ? "" : Number(val);
 
@@ -251,6 +258,25 @@ export function useSudokuGame() {
 		},
 		[board, isGenerating, notes],
 	);
+
+	const handleCheck = useCallback(() => {
+		if (!solvedBoard || isGenerating) return;
+		const incorrects: [number, number][] = [];
+		for (let i = 0; i < 9; i++) {
+			for (let j = 0; j < 9; j++) {
+				if (
+					board[i][j] !== "" &&
+					initialBoard[i][j] === "" &&
+					board[i][j] !== solvedBoard[i][j]
+				) {
+					incorrects.push([i, j]);
+				}
+			}
+		}
+		setCheckingCells(incorrects);
+		if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+		checkTimerRef.current = setTimeout(() => setCheckingCells([]), 3000);
+	}, [board, initialBoard, isGenerating, solvedBoard]);
 
 	const handleHint = useCallback(() => {
 		if (!solvedBoard || isGenerating) return;
@@ -315,7 +341,9 @@ export function useSudokuGame() {
 	const handleUndo = useCallback(() => {
 		if (past.length === 0 || isGenerating || isComplete) return;
 		if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+		if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
 		setHintCell(null);
+		setCheckingCells([]);
 
 		const previous = past[past.length - 1];
 		setPast(past.slice(0, -1));
@@ -328,7 +356,9 @@ export function useSudokuGame() {
 	const handleRedo = useCallback(() => {
 		if (future.length === 0 || isGenerating || isComplete) return;
 		if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+		if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
 		setHintCell(null);
+		setCheckingCells([]);
 
 		const next = future[0];
 		setFuture(future.slice(1));
@@ -376,12 +406,14 @@ export function useSudokuGame() {
 		isGenerating,
 		elapsed,
 		notes,
+		checkingCells,
 		canUndo: past.length > 0,
 		canRedo: future.length > 0,
 		handleChange,
 		handleNotesChange,
 		handleNewSudoku,
 		handleHint,
+		handleCheck,
 		handleAnimateSame,
 		handleUndo,
 		handleRedo,

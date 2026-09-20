@@ -8,6 +8,7 @@ interface SudokuBoardProps {
 	initialBoard: Board;
 	notes: BoardNotes;
 	hintCell: HintCell;
+	checkingCells?: [number, number][];
 	animatingValue: Cell | null;
 	isGenerating?: boolean;
 	onChange: (row: number, col: number, val: string) => void;
@@ -20,6 +21,7 @@ export function SudokuBoard({
 	initialBoard,
 	notes,
 	hintCell,
+	checkingCells = [],
 	animatingValue,
 	isGenerating = false,
 	onChange,
@@ -110,7 +112,12 @@ export function SudokuBoard({
 							{row.map((cell, j) => {
 								const isInitial = initialBoard[i][j] !== "";
 								const isUserCell = !isInitial && cell !== "";
-								const isInvalid = isUserCell && !isValid(board, i, j, cell);
+								const isCheckingError = checkingCells.some(
+									([r, c]) => r === i && c === j,
+								);
+								const isInvalid =
+									isUserCell &&
+									(!isValid(board, i, j, cell) || isCheckingError);
 								const isHint = Boolean(
 									hintCell && hintCell.row === i && hintCell.col === j,
 								);

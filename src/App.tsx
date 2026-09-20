@@ -25,10 +25,12 @@ function App() {
 		isGenerating,
 		elapsed,
 		notes,
+		checkingCells,
 		handleChange,
 		handleNotesChange,
 		handleNewSudoku,
 		handleHint,
+		handleCheck,
 		handleAnimateSame,
 		handleUndo,
 		handleRedo,
@@ -64,6 +66,7 @@ function App() {
 				initialBoard={initialBoard}
 				notes={notes}
 				hintCell={hintCell}
+				checkingCells={checkingCells}
 				animatingValue={animatingValue}
 				isGenerating={isGenerating}
 				onChange={handleChange}
@@ -82,6 +85,15 @@ function App() {
 					aria-label="Undo move"
 				>
 					Undo
+				</button>
+				<button
+					data-testid="check-button"
+					className={cn(BTN_BASE, BTN_VARIANTS.hint)}
+					type="button"
+					onClick={handleCheck}
+					disabled={isComplete || isGenerating}
+				>
+					Check
 				</button>
 				<button
 					data-testid="hint-button"
