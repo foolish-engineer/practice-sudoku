@@ -430,4 +430,38 @@ test.describe("Sudoku App", () => {
 		const restoredCell = page.getByTestId(emptyCellId);
 		await expect(restoredCell).toHaveValue("5");
 	});
+
+	test("toggles dark mode via button and persists preference", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+
+		const htmlElement = page.locator("html");
+		const toggleButton = page.getByRole("button", { name: "Toggle dark mode" });
+
+		// Initial state: default is system, our Playwright browser defaults to light
+		// so it might be light, or it might just not have 'dark' yet.
+		// We'll click it to force a known state.
+		// Wait, if it's currently 'system', clicking it toggles. The button logic is:
+		// theme === 'dark' ? 'light' : 'dark' -> so clicking from system goes to 'dark'.
+		await toggleButton.click();
+
+		// Wait for React to apply the class to the root
+		await expect(htmlElement).toHaveClass(/dark/);
+		await expect(toggleButton).toHaveText("☀️"); // Button changes to sun when dark
+
+		// Click again to toggle back to light
+		await toggleButton.click();
+		await expect(htmlElement).not.toHaveClass(/dark/);
+		await expect(htmlElement).toHaveClass(/light/);
+		await expect(toggleButton).toHaveText("🌙"); // Button changes to moon when light
+
+		// Reload page to verify persistence
+		await page.reload();
+		await waitForBoard(page);
+
+		// Should still be light
+		await expect(htmlElement).not.toHaveClass(/dark/);
+		await expect(htmlElement).toHaveClass(/light/);
+	});
 });
