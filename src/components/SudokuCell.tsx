@@ -33,15 +33,18 @@ export const SudokuCell = memo(function SudokuCell({
 	onAnimateSame,
 }: SudokuCellProps) {
 	const cellClass = cn(
-		"w-[54px] h-[54px] text-center text-[1.2rem] border border-[#bbb] outline-none bg-[#f9f9f9] transition-colors duration-200 text-black",
-		"focus:bg-blue-50 disabled:bg-[#e0e0e0] disabled:text-[#333] disabled:font-bold",
-		(col + 1) % 3 === 0 && "border-r-[3px] border-r-[#333]",
-		(row + 1) % 3 === 0 && "border-b-[3px] border-b-[#333]",
-		row % 3 === 0 && "border-t-[3px] border-t-[#333]",
-		col % 3 === 0 && "border-l-[3px] border-l-[#333]",
-		isHint && "!bg-[#fff59d] transition-colors duration-500",
+		"w-[54px] h-[54px] text-center text-[1.2rem] border border-[#bbb] dark:border-slate-600 outline-none bg-[#f9f9f9] dark:bg-slate-800 transition-colors duration-200 text-black dark:text-white",
+		"focus:bg-blue-50 dark:focus:bg-slate-700 disabled:bg-[#e0e0e0] dark:disabled:bg-slate-900 disabled:text-[#333] dark:disabled:text-slate-100 disabled:font-bold",
+		(col + 1) % 3 === 0 &&
+			"border-r-[3px] border-r-[#333] dark:border-r-slate-400",
+		(row + 1) % 3 === 0 &&
+			"border-b-[3px] border-b-[#333] dark:border-b-slate-400",
+		row % 3 === 0 && "border-t-[3px] border-t-[#333] dark:border-t-slate-400",
+		col % 3 === 0 && "border-l-[3px] border-l-[#333] dark:border-l-slate-400",
+		isHint &&
+			"!bg-[#fff59d] dark:!bg-yellow-900/60 transition-colors duration-500",
 		isInvalid &&
-			"!border-2 !border-red-500 z-[2] !bg-[#fff59d] focus:!bg-[#fff176]",
+			"!border-2 !border-red-500 z-[2] !bg-[#fff59d] dark:!bg-yellow-900/60 focus:!bg-[#fff176] dark:focus:!bg-yellow-800/60",
 		isAnimating && "animate-pulse-highlight z-[5] relative",
 	);
 
@@ -82,7 +85,7 @@ export const SudokuCell = memo(function SudokuCell({
 					onChange={(e) => onNotesChange(row, col, e.target.value)}
 					onClick={(e) => e.stopPropagation()}
 					onKeyDown={(e) => e.stopPropagation()}
-					className="absolute top-[2px] left-[2px] w-[34px] h-[15px] text-[9px] tracking-tight leading-none text-slate-600 bg-transparent border border-slate-300/60 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-0.5 outline-none z-[3] font-medium"
+					className="absolute top-[2px] left-[2px] w-[34px] h-[15px] text-[9px] tracking-tight leading-none text-slate-600 dark:text-slate-300 bg-transparent border border-slate-300/60 dark:border-slate-600/60 hover:border-slate-400 dark:hover:border-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-700 focus:ring-1 focus:ring-blue-400 rounded px-0.5 outline-none z-[3] font-medium"
 					title="Candidate notes"
 					aria-label={`Row ${row + 1}, Column ${col + 1} notes`}
 				/>

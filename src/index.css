@@ -4,6 +4,6 @@
 
 @layer base {
 	body {
-		@apply bg-gray-50 text-gray-800 font-sans min-h-screen m-0 flex items-center justify-center;
+		@apply bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-slate-100 font-sans min-h-screen m-0 flex items-center justify-center transition-colors duration-200;
 	}
 }

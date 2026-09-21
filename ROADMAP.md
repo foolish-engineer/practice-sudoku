@@ -58,7 +58,7 @@
 
 > Differentiates a good product from a great one.
 
-- [ ] **Dark mode** — Tailwind `dark:` variants, toggled by a button + `prefers-color-scheme` system default
+- [x] **Dark mode** — Tailwind `dark:` variants, toggled by a button + `prefers-color-scheme` system default
 - [ ] **Mobile number pad** — custom 1–9 tap grid rendered below the board on touch devices (replaces keyboard typing)
 - [ ] **Keyboard shortcuts** — `H` = hint, `N` = new game, `1–9` = fill focused cell, `0`/`Del` = clear cell
 - [ ] **Statistics dashboard** — track games played, win rate, and best time per difficulty (stored in `localStorage`)
@@ -85,6 +85,6 @@
 | Phase 2 — Quality & Reliability | 4 | 4 |
 | Phase 3 — Accessibility | 6 | 6 |
 | Phase 4 — Core Features | 5 | 5 |
-| Phase 5 — UX & Polish | 5 | 0 |
+| Phase 5 — UX & Polish | 5 | 1 |
 | Phase 6 — Distribution | 4 | 0 |
-| **Total** | **30** | **21** |
+| **Total** | **30** | **22** |

@@ -57,8 +57,8 @@ export class ErrorBoundary extends Component<
 			}
 
 			return (
-				<div className="max-w-[600px] w-full p-8 bg-white rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] text-center mx-auto">
-					<div className="w-12 h-12 mx-auto mb-4 text-red-500 flex items-center justify-center rounded-full bg-red-50">
+				<div className="max-w-[600px] w-full p-8 bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.4)] text-center mx-auto">
+					<div className="w-12 h-12 mx-auto mb-4 text-red-500 dark:text-red-400 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
 						<svg
 							className="w-6 h-6"
 							fill="none"
@@ -75,13 +75,13 @@ export class ErrorBoundary extends Component<
 						</svg>
 					</div>
 
-					<h2 className="text-xl font-bold text-gray-800 mb-2">
+					<h2 className="text-xl font-bold text-gray-800 dark:text-slate-100 mb-2">
 						Something went wrong
 					</h2>
-					<p className="text-gray-600 mb-6 text-sm">
+					<p className="text-gray-600 dark:text-slate-400 mb-6 text-sm">
 						An unexpected error occurred while running the game.
 						{this.state.error?.message && (
-							<span className="block mt-2 font-mono text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100">
+							<span className="block mt-2 font-mono text-xs text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-100 dark:border-red-900/50">
 								{this.state.error.message}
 							</span>
 						)}

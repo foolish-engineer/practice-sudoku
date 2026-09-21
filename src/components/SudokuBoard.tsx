@@ -91,12 +91,12 @@ export function SudokuBoard({
 			{isGenerating && (
 				<div
 					data-testid="generating-overlay"
-					className="absolute inset-0 bg-white/75 backdrop-blur-[1px] flex flex-col items-center justify-center rounded-lg z-20"
+					className="absolute inset-0 bg-white/75 dark:bg-slate-900/75 backdrop-blur-[1px] flex flex-col items-center justify-center rounded-lg z-20"
 					role="status"
 					aria-live="polite"
 				>
 					<div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-2" />
-					<span className="text-sm font-semibold text-gray-700">
+					<span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
 						Generating puzzle...
 					</span>
 				</div>

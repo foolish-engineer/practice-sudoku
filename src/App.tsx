@@ -6,6 +6,7 @@ import {
 } from "./components/GameControls";
 import { SudokuBoard } from "./components/SudokuBoard";
 import { useSudokuGame } from "./hooks/useSudokuGame";
+import { useTheme } from "./hooks/useTheme";
 import { cn, formatTime } from "./utils";
 
 // Re-export core algorithms and types for backwards compatibility
@@ -19,13 +20,13 @@ function App() {
 		level,
 		message,
 		hintCell,
+		checkingCells,
 		animatingValue,
 		isComplete,
 		completedDigits,
 		isGenerating,
 		elapsed,
 		notes,
-		checkingCells,
 		handleChange,
 		handleNotesChange,
 		handleNewSudoku,
@@ -38,10 +39,20 @@ function App() {
 		canRedo,
 	} = useSudokuGame();
 
+	const { theme, setTheme } = useTheme();
+
 	return (
-		<div className="max-w-[600px] w-full p-8 bg-white rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] text-center mx-auto">
-			<h1>Sudoku</h1>
-			<div className="relative mb-2 flex items-center justify-center font-bold text-[1.1em]">
+		<div className="max-w-[600px] w-full p-8 bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.4)] text-center mx-auto relative transition-colors duration-200">
+			<button
+				type="button"
+				onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+				className="absolute top-4 right-4 p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+				aria-label="Toggle dark mode"
+			>
+				{theme === "dark" ? "☀️" : "🌙"}
+			</button>
+			<h1 className="dark:text-slate-100 transition-colors">Sudoku</h1>
+			<div className="relative mb-2 flex items-center justify-center font-bold text-[1.1em] dark:text-slate-200">
 				<div>
 					Level: <span data-testid="sudoku-level-label">{level}</span>
 				</div>
