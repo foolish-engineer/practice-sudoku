@@ -464,4 +464,50 @@ test.describe("Sudoku App", () => {
 		await expect(htmlElement).not.toHaveClass(/dark/);
 		await expect(htmlElement).toHaveClass(/light/);
 	});
+
+	// -------------------------------------------------------------------------
+	// Keyboard shortcuts
+	// -------------------------------------------------------------------------
+
+	test("keyboard shortcuts: 1-9 fills cell, 0 clears cell, H gives hint, N starts new game", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+
+		const cell = await getFirstEmptyCell(page);
+		if (!cell) throw new Error("No empty cell found");
+
+		// 1-9 fills focused cell
+		await cell.focus();
+		await page.keyboard.press("4");
+		await expect(cell).toHaveValue("4");
+
+		// 0 clears cell
+		await page.keyboard.press("0");
+		await expect(cell).toHaveValue("");
+
+		// Del clears cell
+		await page.keyboard.press("7");
+		await expect(cell).toHaveValue("7");
+		await page.keyboard.press("Delete");
+		await expect(cell).toHaveValue("");
+
+		// Blur cell so global shortcuts can fire
+		await cell.blur();
+
+		// H gives hint (focus moves to the hinted cell automatically)
+		await page.keyboard.press("h");
+		const hintedCell = page.locator("input:focus");
+		await expect(hintedCell).toBeVisible({ timeout: 3_000 });
+		expect(await hintedCell.inputValue()).not.toBe("");
+
+		// Blur cell so global shortcuts can fire
+		await hintedCell.blur();
+
+		// N starts a new game (resets timer and loads new board)
+		await page.keyboard.press("n");
+		await waitForBoard(page);
+		const timer = page.getByTestId("timer");
+		await expect(timer).toHaveText("0:00");
+	});
 });

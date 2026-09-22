@@ -437,6 +437,13 @@ export function useSudokuGame() {
 	undoRef.current = handleUndo;
 	const redoRef = useRef(handleRedo);
 	redoRef.current = handleRedo;
+	const hintRef = useRef(handleHint);
+	hintRef.current = handleHint;
+	const newSudokuRef = useRef(handleNewSudoku);
+	newSudokuRef.current = handleNewSudoku;
+	const levelRef = useRef(level);
+	levelRef.current = level;
+
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.metaKey || e.ctrlKey) {
@@ -452,6 +459,33 @@ export function useSudokuGame() {
 					e.preventDefault();
 					redoRef.current();
 				}
+				return;
+			}
+
+			// Don't intercept shortcuts when user is focused inside an input or textarea
+			const target = e.target as HTMLElement | null;
+			if (
+				target &&
+				(target.tagName === "INPUT" ||
+					target.tagName === "TEXTAREA" ||
+					target.isContentEditable)
+			) {
+				return;
+			}
+
+			const key = e.key.toLowerCase();
+			if (key === "h") {
+				e.preventDefault();
+				hintRef.current();
+			} else if (key === "n") {
+				e.preventDefault();
+				const currentDiff: Difficulty =
+					levelRef.current === "Hard"
+						? "hard"
+						: levelRef.current === "Medium"
+							? "medium"
+							: "easy";
+				newSudokuRef.current(currentDiff);
 			}
 		};
 

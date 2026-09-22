@@ -69,7 +69,7 @@ export const SudokuCell = memo(function SudokuCell({
 				aria-invalid={isInvalid}
 				onChange={(e) => onChange(row, col, e.target.value)}
 				onKeyDown={(e) => {
-					if (e.key === "Delete" || e.key === "Backspace") {
+					if (e.key === "Delete" || e.key === "Backspace" || e.key === "0") {
 						onChange(row, col, "");
 					}
 				}}
