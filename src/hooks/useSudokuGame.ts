@@ -437,6 +437,8 @@ export function useSudokuGame() {
 	undoRef.current = handleUndo;
 	const redoRef = useRef(handleRedo);
 	redoRef.current = handleRedo;
+	const checkRef = useRef(handleCheck);
+	checkRef.current = handleCheck;
 	const hintRef = useRef(handleHint);
 	hintRef.current = handleHint;
 	const newSudokuRef = useRef(handleNewSudoku);
@@ -477,6 +479,9 @@ export function useSudokuGame() {
 			if (key === "h") {
 				e.preventDefault();
 				hintRef.current();
+			} else if (key === "c") {
+				e.preventDefault();
+				checkRef.current();
 			} else if (key === "n") {
 				e.preventDefault();
 				const currentDiff: Difficulty =

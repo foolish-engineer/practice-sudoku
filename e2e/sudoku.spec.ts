@@ -469,7 +469,7 @@ test.describe("Sudoku App", () => {
 	// Keyboard shortcuts
 	// -------------------------------------------------------------------------
 
-	test("keyboard shortcuts: 1-9 fills cell, 0 clears cell, H gives hint, N starts new game", async ({
+	test("keyboard shortcuts: 1-9 fills cell, 0 clears cell, H gives hint, C checks puzzle, N starts new game", async ({
 		page,
 	}) => {
 		await waitForBoard(page);
@@ -497,12 +497,21 @@ test.describe("Sudoku App", () => {
 
 		// H gives hint (focus moves to the hinted cell automatically)
 		await page.keyboard.press("h");
-		const hintedCell = page.locator("input:focus");
-		await expect(hintedCell).toBeVisible({ timeout: 3_000 });
-		expect(await hintedCell.inputValue()).not.toBe("");
+		const focusedCell = page.locator("input:focus");
+		await expect(focusedCell).toBeVisible({ timeout: 3_000 });
+		const testId = (await focusedCell.getAttribute("data-testid")) ?? "";
+		const hintedCell = page.getByTestId(testId);
+		const correctVal = await hintedCell.inputValue();
+		expect(correctVal).not.toBe("");
 
-		// Blur cell so global shortcuts can fire
+		// Overwrite hinted cell with an incorrect value, then blur
+		const incorrectVal = correctVal === "1" ? "2" : "1";
+		await hintedCell.fill(incorrectVal);
 		await hintedCell.blur();
+
+		// C triggers check shortcut and marks incorrect cell invalid
+		await page.keyboard.press("c");
+		await expect(hintedCell).toHaveAttribute("aria-invalid", "true");
 
 		// N starts a new game (resets timer and loads new board)
 		await page.keyboard.press("n");

@@ -60,7 +60,7 @@
 
 - [x] **Dark mode** — Tailwind `dark:` variants, toggled by a button + `prefers-color-scheme` system default
 - [ ] **Mobile number pad** — custom 1–9 tap grid rendered below the board on touch devices (replaces keyboard typing)
-- [x] **Keyboard shortcuts** — `H` = hint, `N` = new game, `1–9` = fill focused cell, `0`/`Del` = clear cell
+- [x] **Keyboard shortcuts** — `H` = hint, `N` = new game, `C` = check, `1–9` = fill focused cell, `0`/`Del` = clear cell
 - [ ] **Statistics dashboard** — track games played, win rate, and best time per difficulty (stored in `localStorage`)
 - [ ] **Difficulty badge** — show selected difficulty and remaining empty cell count as a live subtitle below the board
 

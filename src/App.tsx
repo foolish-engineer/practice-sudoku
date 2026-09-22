@@ -103,6 +103,8 @@ function App() {
 					type="button"
 					onClick={handleCheck}
 					disabled={isComplete || isGenerating}
+					title="Check puzzle (C)"
+					aria-label="Check puzzle"
 				>
 					Check
 				</button>
@@ -112,6 +114,8 @@ function App() {
 					type="button"
 					onClick={handleHint}
 					disabled={isComplete || isGenerating}
+					title="Get hint (H)"
+					aria-label="Get hint"
 				>
 					Get Hint
 				</button>
