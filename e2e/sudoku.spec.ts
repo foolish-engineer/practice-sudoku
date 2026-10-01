@@ -519,4 +519,67 @@ test.describe("Sudoku App", () => {
 		const timer = page.getByTestId("timer");
 		await expect(timer).toHaveText("0:00");
 	});
+
+	// -------------------------------------------------------------------------
+	// Statistics Dashboard
+	// -------------------------------------------------------------------------
+
+	test("statistics dashboard opens, switches tabs, updates on game play, and can be reset", async ({
+		page,
+	}) => {
+		await waitForBoard(page);
+
+		const statsBtn = page.getByTestId("stats-button");
+		await expect(statsBtn).toBeVisible();
+
+		// Open stats modal
+		await statsBtn.click();
+		const modal = page.getByTestId("stats-modal");
+		await expect(modal).toBeVisible();
+
+		// Check tabs exist
+		await expect(page.getByTestId("stats-tab-easy")).toBeVisible();
+		await expect(page.getByTestId("stats-tab-medium")).toBeVisible();
+		await expect(page.getByTestId("stats-tab-hard")).toBeVisible();
+		await expect(page.getByTestId("stats-tab-overall")).toBeVisible();
+
+		// Verify initial metrics
+		await expect(page.getByTestId("stat-played")).toContainText("0");
+		await expect(page.getByTestId("stat-won")).toContainText("0");
+		await expect(page.getByTestId("stat-win-rate")).toContainText("0%");
+		await expect(page.getByTestId("stat-best-time")).toContainText("--:--");
+
+		// Switch to Overall tab
+		await page.getByTestId("stats-tab-overall").click();
+		await expect(page.getByTestId("stat-played")).toContainText("0");
+
+		// Close via close button
+		await page.getByTestId("close-stats-button").click();
+		await expect(modal).not.toBeVisible();
+
+		// Play a move on the board to start the game
+		const cell = await getFirstEmptyCell(page);
+		if (!cell) throw new Error("No empty cell found");
+		await cell.fill("5");
+
+		// Open stats again; Easy played count should now be 1
+		await statsBtn.click();
+		await expect(modal).toBeVisible();
+		await page.getByTestId("stats-tab-easy").click();
+		await expect(page.getByTestId("stat-played")).toContainText("1");
+		await expect(page.getByTestId("stat-won")).toContainText("0");
+
+		// Test reset button
+		const resetBtn = page.getByTestId("reset-stats-button");
+		await resetBtn.click();
+		await expect(resetBtn).toHaveText("Confirm Reset?");
+		await resetBtn.click();
+
+		// Stats should be reset back to 0
+		await expect(page.getByTestId("stat-played")).toContainText("0");
+
+		// Close via Escape key
+		await page.keyboard.press("Escape");
+		await expect(modal).not.toBeVisible();
+	});
 });

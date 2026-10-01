@@ -27,3 +27,17 @@ export type CellNotes = string;
 
 /** A 9×9 grid of pencil mark candidate notes. */
 export type BoardNotes = CellNotes[][];
+
+/** Statistics tracked for a single difficulty level. */
+export interface DifficultyStats {
+	gamesPlayed: number;
+	gamesWon: number;
+	bestTime: number | null; // in seconds
+}
+
+/** Complete persistent statistics for the app. */
+export interface SudokuStats {
+	easy: DifficultyStats;
+	medium: DifficultyStats;
+	hard: DifficultyStats;
+}

@@ -1,4 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+	loadStats,
+	recordGameStart,
+	recordGameWin,
+	resetStats,
+} from "../core/stats";
 import { generatePuzzle, isValid } from "../core/sudoku";
 import type {
 	Board,
@@ -8,6 +14,7 @@ import type {
 	HintCell,
 	LevelLabel,
 	SolvedBoard,
+	SudokuStats,
 } from "../types/sudoku";
 import type {
 	GeneratePuzzleRequest,
@@ -54,6 +61,12 @@ const LABEL_MAP: Record<Difficulty, LevelLabel> = {
 	hard: "Hard",
 };
 
+const LEVEL_TO_DIFF: Record<LevelLabel, Difficulty> = {
+	Easy: "easy",
+	Medium: "medium",
+	Hard: "hard",
+};
+
 const MAX_HISTORY = 50;
 
 interface GameSaveState {
@@ -65,6 +78,8 @@ interface GameSaveState {
 	elapsed: number;
 	past: HistoryState[];
 	future: HistoryState[];
+	gameStarted?: boolean;
+	gameWon?: boolean;
 }
 
 export function useSudokuGame() {
@@ -106,11 +121,26 @@ export function useSudokuGame() {
 		() => initialState?.future ?? [],
 	);
 
+	const [stats, setStats] = useState<SudokuStats>(() => loadStats());
+	const [isStatsOpen, setIsStatsOpen] = useState(false);
+	const [gameStarted, setGameStarted] = useState(
+		() => initialState?.gameStarted ?? false,
+	);
+	const [gameWon, setGameWon] = useState(() => initialState?.gameWon ?? false);
+
 	const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const checkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const workerRef = useRef<Worker | null>(null);
 	const requestIdRef = useRef<number>(0);
+
+	const markGameStarted = useCallback(() => {
+		if (!gameStarted && !gameWon) {
+			setGameStarted(true);
+			const diff = LEVEL_TO_DIFF[level];
+			setStats((prev) => recordGameStart(prev, diff));
+		}
+	}, [gameStarted, gameWon, level]);
 
 	const handleNewSudoku = useCallback((difficulty: Difficulty) => {
 		const nextRequestId = ++requestIdRef.current;
@@ -127,6 +157,8 @@ export function useSudokuGame() {
 		setPast([]);
 		setFuture([]);
 		setNotes(emptyNotes());
+		setGameStarted(false);
+		setGameWon(false);
 
 		if (workerRef.current) {
 			const request: GeneratePuzzleRequest = {
@@ -223,6 +255,7 @@ export function useSudokuGame() {
 	const handleNotesChange = useCallback(
 		(row: number, col: number, val: string) => {
 			if (isGenerating) return;
+			markGameStarted();
 
 			const sanitized = Array.from(new Set(val.replace(/[^1-9]/g, "")))
 				.sort()
@@ -238,12 +271,13 @@ export function useSudokuGame() {
 			setFuture([]);
 			setNotes(nextNotes);
 		},
-		[board, isGenerating, notes],
+		[board, isGenerating, markGameStarted, notes],
 	);
 
 	const handleChange = useCallback(
 		(row: number, col: number, val: string) => {
 			if (isGenerating) return;
+			markGameStarted();
 
 			setCheckingCells([]);
 			if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
@@ -292,7 +326,7 @@ export function useSudokuGame() {
 				setMessage("Invalid move!");
 			}
 		},
-		[board, isGenerating, notes],
+		[board, isGenerating, markGameStarted, notes],
 	);
 
 	const handleCheck = useCallback(() => {
@@ -316,6 +350,7 @@ export function useSudokuGame() {
 
 	const handleHint = useCallback(() => {
 		if (!solvedBoard || isGenerating) return;
+		markGameStarted();
 		const incorrects: [number, number][] = [];
 		for (let i = 0; i < 9; i++) {
 			for (let j = 0; j < 9; j++) {
@@ -341,7 +376,7 @@ export function useSudokuGame() {
 
 		if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
 		hintTimerRef.current = setTimeout(() => setHintCell(null), 6000);
-	}, [board, initialBoard, isGenerating, notes, solvedBoard]);
+	}, [board, initialBoard, isGenerating, markGameStarted, notes, solvedBoard]);
 
 	useEffect(() => {
 		if (isGenerating || !solvedBoard) return;
@@ -354,6 +389,8 @@ export function useSudokuGame() {
 			elapsed,
 			past,
 			future,
+			gameStarted,
+			gameWon,
 		};
 		try {
 			localStorage.setItem("practice-sudoku-save", JSON.stringify(state));
@@ -370,6 +407,8 @@ export function useSudokuGame() {
 		past,
 		future,
 		isGenerating,
+		gameStarted,
+		gameWon,
 	]);
 
 	const isComplete = useMemo(
@@ -380,6 +419,20 @@ export function useSudokuGame() {
 			),
 		[board, solvedBoard],
 	);
+
+	useEffect(() => {
+		if (isComplete && !gameWon && solvedBoard) {
+			setGameWon(true);
+			const diff = LEVEL_TO_DIFF[level];
+			setStats((prev) => recordGameWin(prev, diff, elapsed, gameStarted));
+			setGameStarted(true);
+		}
+	}, [isComplete, gameWon, solvedBoard, level, elapsed, gameStarted]);
+
+	const handleResetStats = useCallback(() => {
+		const fresh = resetStats();
+		setStats(fresh);
+	}, []);
 
 	const completedDigits = useMemo(() => {
 		const flatBoard = board.flat();
@@ -511,6 +564,10 @@ export function useSudokuGame() {
 		elapsed,
 		notes,
 		checkingCells,
+		stats,
+		isStatsOpen,
+		setIsStatsOpen,
+		handleResetStats,
 		canUndo: past.length > 0,
 		canRedo: future.length > 0,
 		handleChange,

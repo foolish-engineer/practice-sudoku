@@ -4,6 +4,7 @@ import {
 	BTN_VARIANTS,
 	GameControls,
 } from "./components/GameControls";
+import { StatsModal } from "./components/StatsModal";
 import { SudokuBoard } from "./components/SudokuBoard";
 import { useSudokuGame } from "./hooks/useSudokuGame";
 import { useTheme } from "./hooks/useTheme";
@@ -27,6 +28,10 @@ function App() {
 		isGenerating,
 		elapsed,
 		notes,
+		stats,
+		isStatsOpen,
+		setIsStatsOpen,
+		handleResetStats,
 		handleChange,
 		handleNotesChange,
 		handleNewSudoku,
@@ -43,14 +48,26 @@ function App() {
 
 	return (
 		<div className="max-w-[600px] w-full p-8 bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.4)] text-center mx-auto relative transition-colors duration-200">
-			<button
-				type="button"
-				onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-				className="absolute top-4 right-4 p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors"
-				aria-label="Toggle dark mode"
-			>
-				{theme === "dark" ? "☀️" : "🌙"}
-			</button>
+			<div className="absolute top-4 right-4 flex items-center gap-1">
+				<button
+					type="button"
+					onClick={() => setIsStatsOpen(true)}
+					className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors text-lg leading-none"
+					aria-label="View statistics"
+					title="Statistics"
+					data-testid="stats-button"
+				>
+					📊
+				</button>
+				<button
+					type="button"
+					onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+					className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors text-lg leading-none"
+					aria-label="Toggle dark mode"
+				>
+					{theme === "dark" ? "☀️" : "🌙"}
+				</button>
+			</div>
 			<h1 className="dark:text-slate-100 transition-colors">Sudoku</h1>
 			<div className="relative mb-2 flex items-center justify-center font-bold text-[1.1em] dark:text-slate-200">
 				<div>
@@ -144,6 +161,16 @@ function App() {
 			<div className="text-[0.95em] text-gray-500 mt-3">
 				Fill every row, column, and 3×3 box with numbers 1–9.
 			</div>
+
+			<StatsModal
+				isOpen={isStatsOpen}
+				onClose={() => setIsStatsOpen(false)}
+				stats={stats}
+				onResetStats={handleResetStats}
+				initialDifficulty={
+					level === "Hard" ? "hard" : level === "Medium" ? "medium" : "easy"
+				}
+			/>
 		</div>
 	);
 }
