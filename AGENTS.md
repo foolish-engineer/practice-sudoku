@@ -9,7 +9,7 @@ Welcome to the **Practice Sudoku** repository. Read this file carefully before m
 ## Technology Stack
 
 - **Framework**: React 19 + TypeScript (via Vite 8, base path `/practice-sudoku/`)
-- **Styling**: Tailwind CSS v3 (utilities only, no inline styles or custom CSS)
+- **Styling**: Tailwind CSS v4 (via `@tailwindcss/vite`, utilities only)
 - **Linter & Formatter**: Biome
 - **Unit Testing**: Vitest + `@vitest/coverage-v8` (Node environment, 80%+ threshold)
 - **E2E Testing**: Playwright (port 5174, system Chrome, 3 parallel workers)
@@ -39,10 +39,10 @@ practice-sudoku/
 │   │   └── StatsModal.tsx     # Statistics modal dialog
 │   ├── utils/                 # cn class merger & formatTime helper
 │   ├── App.tsx                # Composition root shell
+│   ├── index.css              # Tailwind v4 @import, @custom-variant dark & @theme tokens
 │   └── main.tsx               # React entry point
 ├── playwright.config.ts       # Runs Vite on port 5174
-├── tailwind.config.js         # Design tokens & pulse animation
-├── vite.config.ts             # Base path: "/practice-sudoku/"
+├── vite.config.ts             # Base path: "/practice-sudoku/", @tailwindcss/vite plugin
 └── ROADMAP.md                 # Engineering roadmap & progress tracker
 ```
 
@@ -81,9 +81,8 @@ practice-sudoku/
 
 ## Styling Conventions
 
-- **Tailwind CSS v3 utilities exclusively**. Never add vanilla CSS files or `style={{}}` inline objects.
-- `index.css` contains only `@tailwind` directives.
-- `tailwind.config.js` defines the `animate-pulse-highlight` keyframe animation for same-digit highlighting.
+- **Tailwind CSS v4 utilities exclusively**. Never add vanilla CSS files or `style={{}}` inline objects.
+- `index.css` contains `@import "tailwindcss";`, `@custom-variant dark`, and `@theme` definitions (e.g. `--animate-pulse-highlight`).
 - Tailwind's `!` modifier (e.g. `!border-red-500`, `!bg-[#fff59d]`) is intentionally used for visual state overrides (invalid inputs, hints).
 
 ---

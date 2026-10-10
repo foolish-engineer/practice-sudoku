@@ -140,7 +140,7 @@ export function StatsModal({
 				<div className="grid grid-cols-2 gap-3 mb-6">
 					<div
 						data-testid="stat-played"
-						className="p-3 bg-gray-50 dark:bg-slate-750 border border-gray-100 dark:border-slate-700 rounded-xl"
+						className="p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 rounded-xl"
 					>
 						<div className="text-2xl font-black text-gray-800 dark:text-slate-100">
 							{currentStats.gamesPlayed}
@@ -152,7 +152,7 @@ export function StatsModal({
 
 					<div
 						data-testid="stat-won"
-						className="p-3 bg-gray-50 dark:bg-slate-750 border border-gray-100 dark:border-slate-700 rounded-xl"
+						className="p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 rounded-xl"
 					>
 						<div className="text-2xl font-black text-gray-800 dark:text-slate-100">
 							{currentStats.gamesWon}
@@ -164,7 +164,7 @@ export function StatsModal({
 
 					<div
 						data-testid="stat-win-rate"
-						className="p-3 bg-gray-50 dark:bg-slate-750 border border-gray-100 dark:border-slate-700 rounded-xl"
+						className="p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 rounded-xl"
 					>
 						<div className="text-2xl font-black text-gray-800 dark:text-slate-100">
 							{winRate}%
@@ -176,7 +176,7 @@ export function StatsModal({
 
 					<div
 						data-testid="stat-best-time"
-						className="p-3 bg-gray-50 dark:bg-slate-750 border border-gray-100 dark:border-slate-700 rounded-xl"
+						className="p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 rounded-xl"
 					>
 						<div className="text-2xl font-black text-gray-800 dark:text-slate-100">
 							{formattedBestTime}

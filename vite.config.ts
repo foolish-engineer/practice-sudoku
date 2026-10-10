@@ -1,9 +1,10 @@
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
 	base: "/practice-sudoku/",
-	plugins: [react()],
+	plugins: [tailwindcss(), react()],
 	test: {
 		// Puzzle generation uses a backtracking solver that can be slow on CI runners.
 		// 60s covers the worst-case hard-difficulty generation without flaking.

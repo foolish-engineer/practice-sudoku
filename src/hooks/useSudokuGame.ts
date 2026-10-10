@@ -126,7 +126,15 @@ export function useSudokuGame() {
 	const [gameStarted, setGameStarted] = useState(
 		() => initialState?.gameStarted ?? false,
 	);
-	const [gameWon, setGameWon] = useState(() => initialState?.gameWon ?? false);
+	const [gameWon, setGameWon] = useState(() => {
+		if (initialState?.gameWon != null) return initialState.gameWon;
+		if (initialState?.solvedBoard && initialState?.board) {
+			return initialState.board.every((row, i) =>
+				row.every((cell, j) => cell === initialState.solvedBoard[i][j]),
+			);
+		}
+		return false;
+	});
 
 	const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -236,6 +244,7 @@ export function useSudokuGame() {
 		return () => {
 			if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
 			if (animTimerRef.current) clearTimeout(animTimerRef.current);
+			if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
 			if (workerRef.current) {
 				workerRef.current.terminate();
 				workerRef.current = null;

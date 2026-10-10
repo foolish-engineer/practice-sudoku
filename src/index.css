@@ -1,6 +1,29 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--animate-pulse-highlight: pulseHighlight 0.75s ease-in-out infinite;
+
+	@keyframes pulseHighlight {
+		0% {
+			transform: scale(1);
+			background-color: #bbdefb;
+			box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
+		}
+		50% {
+			transform: scale(1.08);
+			background-color: #90caf9;
+			box-shadow: 0 0 12px 3px rgba(33, 150, 243, 0.5);
+			z-index: 10;
+		}
+		100% {
+			transform: scale(1);
+			background-color: #bbdefb;
+			box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+		}
+	}
+}
 
 @layer base {
 	body {

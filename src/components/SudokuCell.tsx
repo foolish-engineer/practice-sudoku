@@ -70,6 +70,7 @@ export const SudokuCell = memo(function SudokuCell({
 				onChange={(e) => onChange(row, col, e.target.value)}
 				onKeyDown={(e) => {
 					if (e.key === "Delete" || e.key === "Backspace" || e.key === "0") {
+						e.preventDefault();
 						onChange(row, col, "");
 					}
 				}}

@@ -4,7 +4,11 @@ export type Theme = "light" | "dark" | "system";
 
 export function useTheme() {
 	const [theme, setTheme] = useState<Theme>(() => {
-		return (localStorage.getItem("theme") as Theme) || "system";
+		try {
+			return (localStorage.getItem("theme") as Theme) || "system";
+		} catch {
+			return "system";
+		}
 	});
 
 	useEffect(() => {
@@ -21,7 +25,11 @@ export function useTheme() {
 			root.classList.add(theme);
 		}
 
-		localStorage.setItem("theme", theme);
+		try {
+			localStorage.setItem("theme", theme);
+		} catch (e) {
+			console.error("Failed to save theme preference", e);
+		}
 	}, [theme]);
 
 	return { theme, setTheme };
